@@ -27,7 +27,7 @@ func main() {
 
 	downloaderJob := downloader.NewDownloaderJob(
 		dependencies.Downloader,
-		dependencies.Config,
+		dependencies.SettingsRepository,
 	)
 
 	err = downloaderJob.Run(context.Background())

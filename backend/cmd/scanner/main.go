@@ -27,7 +27,7 @@ func main() {
 
 	scannerJob := scanner.NewScannerJob(
 		dependencies.UpdatesScanner,
-		dependencies.Config,
+		dependencies.SettingsRepository,
 	)
 
 	err = scannerJob.Run(context.Background())
