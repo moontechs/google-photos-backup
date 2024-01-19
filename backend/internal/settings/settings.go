@@ -11,10 +11,10 @@ type SettingsInitializer interface {
 }
 
 type SettingsData struct {
-	RootPath           string        `json:"root_path"`
-	ScannerJobDelay    time.Duration `json:"scanner_job_delay"`
-	DownloaderJobDelay time.Duration `json:"downloader_job_delay"`
-	Host               string        `json:"host"`
+	RootPath                 string        `json:"root_path"`
+	PhotosScannerJobDelay    time.Duration `json:"photos_scanner_job_delay"`
+	PhotosDownloaderJobDelay time.Duration `json:"photos_downloader_job_delay"`
+	Host                     string        `json:"host"`
 }
 
 type settings struct {
@@ -30,10 +30,10 @@ func NewSettings(repository Repository) settings {
 // Saves default settings if doesn't exist
 func (c settings) Init() error {
 	defaultSettingsData := SettingsData{
-		RootPath:           "/data",
-		ScannerJobDelay:    time.Minute,
-		DownloaderJobDelay: time.Minute,
-		Host:               "http://localhost:8080",
+		RootPath:                 "/data",
+		PhotosScannerJobDelay:    time.Minute,
+		PhotosDownloaderJobDelay: time.Minute,
+		Host:                     "http://localhost:8080",
 	}
 
 	defaultSettings, err := json.Marshal(defaultSettingsData)

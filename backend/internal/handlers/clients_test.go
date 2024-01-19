@@ -23,8 +23,8 @@ func TestClientsHandle(t *testing.T) {
 		handler := NewClientsApiHandler(fakeGoogleClientRepository, fakeSettingsRepository)
 
 		fakeGoogleClientRepository.FindAllReturns(map[string][]byte{
-			"id1": []byte("{\"id\":\"id1\",\"secret\":\"secret1\",\"redirect_url\":\"http://localhost:8080/redirect_url/id1\"}"),
-			"id2": []byte("{\"id\":\"id2\",\"secret\":\"secret2\",\"redirect_url\":\"http://localhost:8080/redirect_url/id2\"}"),
+			"id1": []byte(`{"id":"id1","secret":"secret1","redirect_url":"http://localhost:8080/redirect_url/id1"}`),
+			"id2": []byte(`{"id":"id2","secret":"secret2","redirect_url":"http://localhost:8080/redirect_url/id2"}`),
 		}, nil)
 
 		w := httptest.NewRecorder()
@@ -34,7 +34,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, "{\"data\":[{\"id\":\"id1\",\"secret\":\"secret1\",\"redirect_url\":\"http://localhost:8080/redirect_url/id1\"},{\"id\":\"id2\",\"secret\":\"secret2\",\"redirect_url\":\"http://localhost:8080/redirect_url/id2\"}]}", w.Body.String())
+		assert.Equal(t, `{"data":[{"id":"id1","secret":"secret1","redirect_url":"http://localhost:8080/redirect_url/id1"},{"id":"id2","secret":"secret2","redirect_url":"http://localhost:8080/redirect_url/id2"}]}`, w.Body.String())
 	})
 
 	t.Run("get one client", func(t *testing.T) {
@@ -43,7 +43,7 @@ func TestClientsHandle(t *testing.T) {
 		handler := NewClientsApiHandler(fakeGoogleClientRepository, fakeSettingsRepository)
 
 		fakeGoogleClientRepository.FindReturns(
-			[]byte("{\"id\":\"id1\",\"secret\":\"secret1\",\"redirect_url\":\"http://localhost:8080/redirect_url/id1\"}"),
+			[]byte(`{"id":"id1","secret":"secret1","redirect_url":"http://localhost:8080/redirect_url/id1"}`),
 			nil,
 		)
 
@@ -60,7 +60,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, "{\"data\":{\"id\":\"id1\",\"secret\":\"secret1\",\"redirect_url\":\"http://localhost:8080/redirect_url/id1\"}}", w.Body.String())
+		assert.Equal(t, `{"data":{"id":"id1","secret":"secret1","redirect_url":"http://localhost:8080/redirect_url/id1"}}`, w.Body.String())
 	})
 
 	t.Run("list of clients not found", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, "{\"data\":[]}", w.Body.String())
+		assert.Equal(t, `{"data":[]}`, w.Body.String())
 	})
 
 	t.Run("one client not found", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
-		assert.Equal(t, "{\"message\":\"error\"}", w.Body.String())
+		assert.Equal(t, `{"message":"error"}`, w.Body.String())
 	})
 
 	t.Run("one client not found", func(t *testing.T) {
@@ -139,7 +139,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
-		assert.Equal(t, "{\"message\":\"error\"}", w.Body.String())
+		assert.Equal(t, `{"message":"error"}`, w.Body.String())
 	})
 
 	t.Run("create a client", func(t *testing.T) {
@@ -148,14 +148,14 @@ func TestClientsHandle(t *testing.T) {
 		handler := NewClientsApiHandler(fakeGoogleClientRepository, fakeSettingsRepository)
 
 		fakeSettingsRepository.FindReturns(
-			[]byte("{\"host\":\"http://domain\"}"),
+			[]byte(`{"host":"http://domain"}`),
 			nil,
 		)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Request, _ = http.NewRequest(http.MethodPost, "/clients", bytes.NewBuffer(
-			[]byte("{\"id\":\"id1\",\"secret\":\"secret1\"}"),
+			[]byte(`{"id":"id1","secret":"secret1"}`),
 		))
 
 		handler.Handle(c)
@@ -163,10 +163,10 @@ func TestClientsHandle(t *testing.T) {
 		clientId, clientData := fakeGoogleClientRepository.SaveArgsForCall(0)
 
 		assert.Equal(t, http.StatusCreated, w.Code)
-		assert.Equal(t, "{\"data\":{\"id\":\"id1\",\"secret\":\"secret1\",\"redirect_url\":\"http://domain/auth/google/callback/id1\"}}", w.Body.String())
+		assert.Equal(t, `{"data":{"id":"id1","secret":"secret1","redirect_url":"http://domain/auth/google/callback/id1"}}`, w.Body.String())
 		assert.Equal(t, 1, fakeGoogleClientRepository.SaveCallCount())
 		assert.Equal(t, "id1", clientId)
-		assert.Equal(t, "{\"id\":\"id1\",\"secret\":\"secret1\",\"redirect_url\":\"http://domain/auth/google/callback/id1\"}", string(clientData))
+		assert.Equal(t, `{"id":"id1","secret":"secret1","redirect_url":"http://domain/auth/google/callback/id1"}`, string(clientData))
 	})
 
 	t.Run("create a client validation", func(t *testing.T) {
@@ -183,7 +183,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"message\":\"Key: 'updateClientRequest.ID' Error:Field validation for 'ID' failed on the 'required' tag\\nKey: 'updateClientRequest.Secret' Error:Field validation for 'Secret' failed on the 'required' tag\"}", w.Body.String())
+		assert.Equal(t, `{"message":"Key: 'updateClientRequest.ID' Error:Field validation for 'ID' failed on the 'required' tag\nKey: 'updateClientRequest.Secret' Error:Field validation for 'Secret' failed on the 'required' tag"}`, w.Body.String())
 		assert.Equal(t, 0, fakeGoogleClientRepository.SaveCallCount())
 	})
 

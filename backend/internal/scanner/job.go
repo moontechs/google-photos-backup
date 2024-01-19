@@ -41,7 +41,7 @@ func (s scannerJob) GetDelay() time.Duration {
 		return 1 * time.Minute
 	}
 
-	return settingsData.ScannerJobDelay
+	return settingsData.PhotosScannerJobDelay
 }
 
 func (s scannerJob) GetName() string {

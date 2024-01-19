@@ -41,7 +41,7 @@ func (s downloaderJob) GetDelay() time.Duration {
 		return 1 * time.Minute
 	}
 
-	return settingsData.DownloaderJobDelay
+	return settingsData.PhotosDownloaderJobDelay
 }
 
 func (s downloaderJob) GetName() string {

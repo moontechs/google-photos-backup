@@ -51,7 +51,7 @@ func TestGoogleCallbackHandle(t *testing.T) {
 
 		clientId, assignedAccounts := fakeGoogleClientRepository.SaveAssignedAccountsArgsForCall(0)
 		assert.Equal(t, "id1", clientId)
-		assert.Equal(t, []byte("[\"email\"]"), assignedAccounts)
+		assert.Equal(t, []byte(`["email"]`), assignedAccounts)
 	})
 
 	t.Run("receive callback account assigned to another client", func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestGoogleCallbackHandle(t *testing.T) {
 		fakeSettingsRepository.FindReturns([]byte(`{"host": "http://localhost:8080"}`), nil)
 
 		fakeGoogleClientRepository.FindAllAssignedAccountsReturns(map[string][]byte{
-			"id2": []byte("[\"email\", \"email2\"]"),
+			"id2": []byte(`["email", "email2"]`),
 		}, nil)
 
 		w := httptest.NewRecorder()
@@ -92,11 +92,11 @@ func TestGoogleCallbackHandle(t *testing.T) {
 		// first call to unassign account from a previous client
 		clientId, assignedAccounts := fakeGoogleClientRepository.SaveAssignedAccountsArgsForCall(0)
 		assert.Equal(t, "id2", clientId)
-		assert.Equal(t, []byte("[\"email2\"]"), assignedAccounts)
+		assert.Equal(t, []byte(`["email2"]`), assignedAccounts)
 
 		// second call to assign account to a new client
 		clientId, assignedAccounts = fakeGoogleClientRepository.SaveAssignedAccountsArgsForCall(1)
 		assert.Equal(t, "id1", clientId)
-		assert.Equal(t, []byte("[\"email\"]"), assignedAccounts)
+		assert.Equal(t, []byte(`["email"]`), assignedAccounts)
 	})
 }
