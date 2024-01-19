@@ -9,21 +9,21 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "cmd/app/main.go",
+            "program": "backend/cmd/app/main.go",
         },
         {
             "name": "Debug scanner job",
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "cmd/scanner/main.go",
+            "program": "backend/cmd/scanner/main.go",
         },
         {
             "name": "Debug downloader job",
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "cmd/downloader/main.go",
+            "program": "backend/cmd/downloader/main.go",
         }
     ]
 }
