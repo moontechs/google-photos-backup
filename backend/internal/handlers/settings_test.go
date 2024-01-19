@@ -64,5 +64,6 @@ func TestSettingsHandle(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 		assert.Equal(t, `{"message":"Key: 'settingsUpdateRequest.RootPath' Error:Field validation for 'RootPath' failed on the 'required' tag\nKey: 'settingsUpdateRequest.PhotosScannerJobDelay' Error:Field validation for 'PhotosScannerJobDelay' failed on the 'required' tag\nKey: 'settingsUpdateRequest.PhotosDownloaderJobDelay' Error:Field validation for 'PhotosDownloaderJobDelay' failed on the 'required' tag\nKey: 'settingsUpdateRequest.Host' Error:Field validation for 'Host' failed on the 'required' tag"}`, w.Body.String())
+		assert.Equal(t, 0, fakeSettingsRepository.SaveCallCount())
 	})
 }
