@@ -43,6 +43,18 @@ type FakeRepository struct {
 		result1 map[string][]byte
 		result2 error
 	}
+	FindAllAssignedAccountsStub        func() (map[string][]byte, error)
+	findAllAssignedAccountsMutex       sync.RWMutex
+	findAllAssignedAccountsArgsForCall []struct {
+	}
+	findAllAssignedAccountsReturns struct {
+		result1 map[string][]byte
+		result2 error
+	}
+	findAllAssignedAccountsReturnsOnCall map[int]struct {
+		result1 map[string][]byte
+		result2 error
+	}
 	FindAssignedAccountsStub        func(string) ([]byte, error)
 	findAssignedAccountsMutex       sync.RWMutex
 	findAssignedAccountsArgsForCall []struct {
@@ -265,6 +277,62 @@ func (fake *FakeRepository) FindAllReturnsOnCall(i int, result1 map[string][]byt
 	}{result1, result2}
 }
 
+func (fake *FakeRepository) FindAllAssignedAccounts() (map[string][]byte, error) {
+	fake.findAllAssignedAccountsMutex.Lock()
+	ret, specificReturn := fake.findAllAssignedAccountsReturnsOnCall[len(fake.findAllAssignedAccountsArgsForCall)]
+	fake.findAllAssignedAccountsArgsForCall = append(fake.findAllAssignedAccountsArgsForCall, struct {
+	}{})
+	stub := fake.FindAllAssignedAccountsStub
+	fakeReturns := fake.findAllAssignedAccountsReturns
+	fake.recordInvocation("FindAllAssignedAccounts", []interface{}{})
+	fake.findAllAssignedAccountsMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRepository) FindAllAssignedAccountsCallCount() int {
+	fake.findAllAssignedAccountsMutex.RLock()
+	defer fake.findAllAssignedAccountsMutex.RUnlock()
+	return len(fake.findAllAssignedAccountsArgsForCall)
+}
+
+func (fake *FakeRepository) FindAllAssignedAccountsCalls(stub func() (map[string][]byte, error)) {
+	fake.findAllAssignedAccountsMutex.Lock()
+	defer fake.findAllAssignedAccountsMutex.Unlock()
+	fake.FindAllAssignedAccountsStub = stub
+}
+
+func (fake *FakeRepository) FindAllAssignedAccountsReturns(result1 map[string][]byte, result2 error) {
+	fake.findAllAssignedAccountsMutex.Lock()
+	defer fake.findAllAssignedAccountsMutex.Unlock()
+	fake.FindAllAssignedAccountsStub = nil
+	fake.findAllAssignedAccountsReturns = struct {
+		result1 map[string][]byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) FindAllAssignedAccountsReturnsOnCall(i int, result1 map[string][]byte, result2 error) {
+	fake.findAllAssignedAccountsMutex.Lock()
+	defer fake.findAllAssignedAccountsMutex.Unlock()
+	fake.FindAllAssignedAccountsStub = nil
+	if fake.findAllAssignedAccountsReturnsOnCall == nil {
+		fake.findAllAssignedAccountsReturnsOnCall = make(map[int]struct {
+			result1 map[string][]byte
+			result2 error
+		})
+	}
+	fake.findAllAssignedAccountsReturnsOnCall[i] = struct {
+		result1 map[string][]byte
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRepository) FindAssignedAccounts(arg1 string) ([]byte, error) {
 	fake.findAssignedAccountsMutex.Lock()
 	ret, specificReturn := fake.findAssignedAccountsReturnsOnCall[len(fake.findAssignedAccountsArgsForCall)]
@@ -472,6 +540,8 @@ func (fake *FakeRepository) Invocations() map[string][][]interface{} {
 	defer fake.findMutex.RUnlock()
 	fake.findAllMutex.RLock()
 	defer fake.findAllMutex.RUnlock()
+	fake.findAllAssignedAccountsMutex.RLock()
+	defer fake.findAllAssignedAccountsMutex.RUnlock()
 	fake.findAssignedAccountsMutex.RLock()
 	defer fake.findAssignedAccountsMutex.RUnlock()
 	fake.saveMutex.RLock()

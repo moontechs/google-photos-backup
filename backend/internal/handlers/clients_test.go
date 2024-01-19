@@ -148,7 +148,7 @@ func TestClientsHandle(t *testing.T) {
 		handler := NewClientsApiHandler(fakeGoogleClientRepository, fakeSettingsRepository)
 
 		fakeSettingsRepository.FindReturns(
-			[]byte("{\"domain\":\"http://domain\"}"),
+			[]byte("{\"host\":\"http://domain\"}"),
 			nil,
 		)
 

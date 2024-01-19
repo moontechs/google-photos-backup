@@ -14,7 +14,7 @@ type SettingsData struct {
 	RootPath           string        `json:"root_path"`
 	ScannerJobDelay    time.Duration `json:"scanner_job_delay"`
 	DownloaderJobDelay time.Duration `json:"downloader_job_delay"`
-	Domain             string        `json:"domain"`
+	Host               string        `json:"host"`
 }
 
 type settings struct {
@@ -33,7 +33,7 @@ func (c settings) Init() error {
 		RootPath:           "/data",
 		ScannerJobDelay:    time.Minute,
 		DownloaderJobDelay: time.Minute,
-		Domain:             "http://localhost:8080",
+		Host:               "http://localhost:8080",
 	}
 
 	defaultSettings, err := json.Marshal(defaultSettingsData)

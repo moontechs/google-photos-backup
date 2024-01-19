@@ -188,5 +188,5 @@ func (h *clientsApiHandler) generateRedirectUrl(clientID string) (string, error)
 		return "", fmt.Errorf("marshal settings: %w", err)
 	}
 
-	return fmt.Sprintf("%s/auth/google/callback/%s", settingsData.Domain, clientID), nil
+	return fmt.Sprintf("%s/auth/google/callback/%s", settingsData.Host, clientID), nil
 }

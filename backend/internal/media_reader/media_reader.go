@@ -59,7 +59,7 @@ func (r reader) CreateMediaReaders(ctx context.Context) (map[string]media.Reader
 			return nil, fmt.Errorf("get account oauth client name: %w", err)
 		}
 
-		gClient, err := r.googleAuth.GetClient(ctx, clientName, &authToken)
+		gClient, err := r.googleAuth.GetHttpClient(ctx, clientName, &authToken)
 		if err != nil {
 			return nil, fmt.Errorf("get google client: %w", err)
 		}

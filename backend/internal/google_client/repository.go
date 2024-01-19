@@ -1,6 +1,8 @@
 package google_client
 
-import "go.etcd.io/bbolt"
+import (
+	"go.etcd.io/bbolt"
+)
 
 const (
 	clientBucketName           = "clients"
@@ -12,6 +14,7 @@ type Repository interface {
 	Find(key string) ([]byte, error)
 	FindAll() (map[string][]byte, error)
 	FindAssignedAccounts(clientId string) ([]byte, error)
+	FindAllAssignedAccounts() (map[string][]byte, error)
 	Save(key string, value []byte) error
 	SaveAssignedAccounts(clientId string, value []byte) error
 	Delete(key string) error
@@ -78,6 +81,25 @@ func (r repository) FindAssignedAccounts(clientId string) ([]byte, error) {
 	})
 
 	return value, err
+}
+
+func (r repository) FindAllAssignedAccounts() (map[string][]byte, error) {
+	var values map[string][]byte
+
+	err := r.DB.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(assignedAccountsBucketName))
+		if bucket == nil {
+			return nil
+		}
+
+		return bucket.ForEach(func(k, v []byte) error {
+			values[string(k)] = v
+
+			return nil
+		})
+	})
+
+	return values, err
 }
 
 func (r repository) Save(key string, value []byte) error {

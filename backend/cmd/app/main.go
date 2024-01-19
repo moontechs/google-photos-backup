@@ -54,10 +54,12 @@ func main() {
 func createGinServer(dependencies dependencies.Dependencies) *gin.Engine {
 	ginEngine := gin.Default()
 
-	// ginEngine.GET("/auth/google/callback/:clientId", handlers.NewGoogleCallbackHandler(
-	// 	dependencies.AccountRepository,
-	// 	dependencies.GoogleAuth,
-	// ).Handle)
+	ginEngine.GET("/auth/google/callback/:clientId", handlers.NewGoogleCallbackHandler(
+		dependencies.AccountRepository,
+		dependencies.GoogleClientRepository,
+		dependencies.SettingsRepository,
+		dependencies.GoogleAuth,
+	).Handle)
 
 	// ginEngine.POST("/api/v1/rescan", handlers.NewRescanHandler(
 	// 	dependencies.AccountRepository,

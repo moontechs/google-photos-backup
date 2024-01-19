@@ -19,6 +19,7 @@ var ignoreKeys = []string{
 	"app",
 }
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Repository
 type Repository interface {
 	SaveToken(email string, token []byte) error
 	SaveAccountOauthClientName(email string, clientName []byte) error

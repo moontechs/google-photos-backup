@@ -12,10 +12,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Auth
 type Auth interface {
 	GetRedirectUrl(clientId string) (string, error)
 	GetToken(ctx context.Context, clientName, code string) (*oauth2.Token, error)
-	GetClient(ctx context.Context, clientName string, token *oauth2.Token) (*http.Client, error)
+	GetHttpClient(ctx context.Context, clientId string, token *oauth2.Token) (*http.Client, error)
 	GetUserInfo(client *http.Client) (UserInfo, error)
 	SaveOauthClientData(email string, oauthClientData OauthClientData) error
 	GetOauthClientData(email string) (OauthClientData, error)
@@ -54,8 +55,8 @@ func (g googleAuth) GetRedirectUrl(clientId string) (string, error) {
 	return gConfig.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.ApprovalForce), nil
 }
 
-func (g googleAuth) GetToken(ctx context.Context, clientName, code string) (*oauth2.Token, error) {
-	gConfig, err := g.createConfig(clientName)
+func (g googleAuth) GetToken(ctx context.Context, clientId, code string) (*oauth2.Token, error) {
+	gConfig, err := g.createConfig(clientId)
 	if err != nil {
 		return nil, fmt.Errorf("create config: %v", err)
 	}
@@ -68,8 +69,8 @@ func (g googleAuth) GetToken(ctx context.Context, clientName, code string) (*oau
 	return token, nil
 }
 
-func (g googleAuth) GetClient(ctx context.Context, clientName string, token *oauth2.Token) (*http.Client, error) {
-	gConfig, err := g.createConfig(clientName)
+func (g googleAuth) GetHttpClient(ctx context.Context, clientId string, token *oauth2.Token) (*http.Client, error) {
+	gConfig, err := g.createConfig(clientId)
 	if err != nil {
 		return nil, fmt.Errorf("create config: %v", err)
 	}
