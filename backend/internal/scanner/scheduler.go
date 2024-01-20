@@ -5,8 +5,9 @@ import (
 	"fmt"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Scheduler
 type Scheduler interface {
-	ScheduleRescan(email string) error
+	ScheduleRescan(rescanType, email string) error
 }
 
 type scheduler struct {
@@ -21,7 +22,7 @@ func NewScheduler(repository Repository) *scheduler {
 	return &scheduler{repository: repository}
 }
 
-func (s *scheduler) ScheduleRescan(email string) error {
+func (s *scheduler) ScheduleRescan(rescanType, email string) error {
 	rescanRequest := RescanRequest{
 		NextPageToken: "",
 	}
@@ -31,5 +32,5 @@ func (s *scheduler) ScheduleRescan(email string) error {
 		return fmt.Errorf("marshal scan data: %w", err)
 	}
 
-	return s.repository.UpdateRescanRequest(email, rescanRequestJson)
+	return s.repository.UpdateRescanRequest(rescanType, email, rescanRequestJson)
 }

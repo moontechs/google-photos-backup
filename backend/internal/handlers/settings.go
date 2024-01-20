@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
 	"google-backup/internal/settings"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type settingsApiHandler struct {
@@ -19,6 +21,8 @@ type settingsUpdateRequest struct {
 	PhotosScannerJobDelay    int64  `json:"photos_scanner_job_delay" binding:"required,numeric"`
 	PhotosDownloaderJobDelay int64  `json:"photos_downloader_job_delay" binding:"required,numeric"`
 	Host                     string `json:"host" binding:"required,ascii"`
+	PhotosBackupEnabled      bool   `json:"photos_backup_enabled" binding:"required,boolean"`
+	DriveBackupEnabled       bool   `json:"drive_backup_enabled" binding:"required,boolean"`
 }
 
 func NewSettingsHandler(settingsRepository settings.Repository) *settingsApiHandler {
@@ -52,6 +56,7 @@ func (h *settingsApiHandler) handleGet(c *gin.Context) {
 	err = json.Unmarshal(settingsJson, &settingsData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		log.Error(fmt.Errorf("unmarshall settings json: %w", err))
 
 		return
 	}
@@ -75,11 +80,14 @@ func (h *settingsApiHandler) handlePost(c *gin.Context) {
 		PhotosScannerJobDelay:    time.Duration(request.PhotosScannerJobDelay * int64(time.Minute)),
 		PhotosDownloaderJobDelay: time.Duration(request.PhotosDownloaderJobDelay * int64(time.Minute)),
 		Host:                     request.Host,
+		PhotosBackupEnabled:      true,
+		DriveBackupEnabled:       true,
 	}
 
 	settingsJson, err := json.Marshal(settingsData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		log.Error(fmt.Errorf("marshall settings data: %w", err))
 
 		return
 	}
@@ -87,6 +95,7 @@ func (h *settingsApiHandler) handlePost(c *gin.Context) {
 	err = h.settingsRepository.Save(settingsJson)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		log.Error(fmt.Errorf("save settings: %w", err))
 
 		return
 	}

@@ -3,7 +3,6 @@ package scanner
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 
 	"google-backup/internal/account"
@@ -14,8 +13,18 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const (
+	RescanTypePhotos = "photos"
+	RescanTypeDrive  = "drive"
+)
+
 type UpdatesScanner interface {
 	ScanAll(ctx context.Context) error
+}
+
+type RescanRequests struct {
+	Photos RescanRequest `json:"photos"`
+	Drive  RescanRequest `json:"drive"`
 }
 
 type updatesScanner struct {
@@ -67,62 +76,75 @@ func (u updatesScanner) ScanAll(ctx context.Context) error {
 }
 
 func (u updatesScanner) scan(ctx context.Context, mediaReader media.Reader, email string) error {
-	rescanRequest, err := u.getRescanRequest(email)
-	if err != nil {
-		return fmt.Errorf("get rescan request: %w", err)
-	}
+	// rescanRequests, err := u.getRescanRequests(email)
+	// if err != nil {
+	// 	return fmt.Errorf("get rescan requests: %w", err)
+	// }
 
-	mediaItems, err := mediaReader.GetMediaItems(string(email), rescanRequest.NextPageToken)
-	if err != nil {
-		if errors.As(err, &media.TooManyRequestsError{}) {
-			u.accountLimiter.SetLimitReached(string(email), account.ApiRequestLimitType, true)
-		}
+	// mediaItems, err := mediaReader.GetMediaItems(string(email), rescanRequest.NextPageToken)
+	// if err != nil {
+	// 	if errors.As(err, &media.TooManyRequestsError{}) {
+	// 		u.accountLimiter.SetLimitReached(string(email), account.ApiRequestLimitType, true)
+	// 	}
 
-		return fmt.Errorf("get media items: %w", err)
-	}
+	// 	return fmt.Errorf("get media items: %w", err)
+	// }
 
-	u.accountLimiter.SetLimitReached(string(email), account.ApiRequestLimitType, false)
+	// u.accountLimiter.SetLimitReached(string(email), account.ApiRequestLimitType, false)
 
-	if len(mediaItems.Items) == 0 {
-		return u.repository.DeleteRescanRequest(email)
-	}
+	// if len(mediaItems.Items) == 0 {
+	// 	return u.repository.DeleteRescanRequest(email)
+	// }
 
-	for _, item := range mediaItems.Items {
-		err := u.downloadScheduler.ScheduleDownload(email, item.ID)
-		if err != nil {
-			return fmt.Errorf("schedule download: %w", err)
-		}
-	}
+	// for _, item := range mediaItems.Items {
+	// 	err := u.downloadScheduler.ScheduleDownload(email, item.ID)
+	// 	if err != nil {
+	// 		return fmt.Errorf("schedule download: %w", err)
+	// 	}
+	// }
 
-	rescanRequest.NextPageToken = mediaItems.NextPageToken
-	if rescanRequest.NextPageToken == "" {
-		return u.repository.DeleteRescanRequest(email)
+	// rescanRequest.NextPageToken = mediaItems.NextPageToken
+	// if rescanRequest.NextPageToken == "" {
+	// 	return u.repository.DeleteRescanRequest(email)
 
-	}
+	// }
 
-	rescanRequestJson, err := json.Marshal(rescanRequest)
-	if err != nil {
-		return fmt.Errorf("marshal next page token: %w", err)
-	}
+	// rescanRequestJson, err := json.Marshal(rescanRequest)
+	// if err != nil {
+	// 	return fmt.Errorf("marshal next page token: %w", err)
+	// }
 
-	return u.repository.UpdateRescanRequest(email, rescanRequestJson)
+	// return u.repository.UpdateRescanRequest(email, rescanRequestJson)
+
+	return nil
 }
 
-func (u updatesScanner) getRescanRequest(email string) (RescanRequest, error) {
-	rescanRequestJson, err := u.repository.GetRescanRequest(string(email))
+func (u updatesScanner) getRescanRequests(email string) (RescanRequests, error) {
+	rescanRequestsMap, err := u.repository.GetRescanRequests(string(email))
 	if err != nil {
-		return RescanRequest{}, fmt.Errorf("get rescan request: %w", err)
+		return RescanRequests{}, fmt.Errorf("get rescan request: %w", err)
 	}
 
-	if len(rescanRequestJson) == 0 {
-		return RescanRequest{}, fmt.Errorf("rescan request not found")
+	var rescanRequests RescanRequests
+
+	for rescanType, rescanRequestJson := range rescanRequestsMap {
+		if rescanRequestJson == nil {
+			continue
+		}
+
+		var rescanRequest RescanRequest
+		err = json.Unmarshal(rescanRequestJson, &rescanRequest)
+		if err != nil {
+			return RescanRequests{}, fmt.Errorf("unmarshal next batch: %w", err)
+		}
+
+		switch rescanType {
+		case RescanTypePhotos:
+			rescanRequests.Photos = rescanRequest
+		case RescanTypeDrive:
+			rescanRequests.Drive = rescanRequest
+		}
 	}
 
-	var rescanRequest RescanRequest
-	err = json.Unmarshal(rescanRequestJson, &rescanRequest)
-	if err != nil {
-		return RescanRequest{}, fmt.Errorf("unmarshal next batch: %w", err)
-	}
-
-	return rescanRequest, err
+	return rescanRequests, err
 }

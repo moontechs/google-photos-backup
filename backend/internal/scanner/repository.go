@@ -10,9 +10,10 @@ const (
 	rescanRequestKey = "rescan"
 )
 
+//go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Repository
 type Repository interface {
-	UpdateRescanRequest(email string, value []byte) error
-	GetRescanRequest(email string) ([]byte, error)
+	UpdateRescanRequest(rescanType, email string, value []byte) error
+	GetRescanRequests(email string) (map[string][]byte, error)
 	DeleteRescanRequest(email string) error
 }
 
@@ -29,19 +30,19 @@ func NewRepository(db *bbolt.DB) *repo {
 	return &repo{DB: db}
 }
 
-func (r *repo) UpdateRescanRequest(email string, value []byte) error {
+func (r *repo) UpdateRescanRequest(rescanType, email string, value []byte) error {
 	return r.DB.Update(func(tx *bbolt.Tx) error {
 		bucket, err := tx.CreateBucketIfNotExists([]byte(email))
 		if err != nil {
 			return err
 		}
 
-		return bucket.Put([]byte(rescanRequestKey), value)
+		return bucket.Put([]byte(rescanRequestKey+"-"+rescanType), value)
 	})
 }
 
-func (r *repo) GetRescanRequest(email string) ([]byte, error) {
-	var value []byte
+func (r *repo) GetRescanRequests(email string) (map[string][]byte, error) {
+	var values map[string][]byte
 
 	err := r.DB.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(email))
@@ -49,12 +50,13 @@ func (r *repo) GetRescanRequest(email string) ([]byte, error) {
 			return errors.New("account not found")
 		}
 
-		value = bucket.Get([]byte(rescanRequestKey))
+		values[RescanTypePhotos] = bucket.Get([]byte(rescanRequestKey + "-" + RescanTypePhotos))
+		values[RescanTypeDrive] = bucket.Get([]byte(rescanRequestKey + "-" + RescanTypeDrive))
 
 		return nil
 	})
 
-	return value, err
+	return values, err
 }
 
 func (r *repo) DeleteRescanRequest(email string) error {

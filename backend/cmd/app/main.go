@@ -61,10 +61,10 @@ func createGinServer(dependencies dependencies.Dependencies) *gin.Engine {
 		dependencies.GoogleAuth,
 	).Handle)
 
-	// ginEngine.POST("/api/v1/rescan", handlers.NewRescanHandler(
-	// 	dependencies.AccountRepository,
-	// 	scanner.NewScheduler(dependencies.ScannerRepository),
-	// ).Handle)
+	ginEngine.POST("/api/v1/rescan", handlers.NewRescanHandler(
+		dependencies.AccountRepository,
+		scanner.NewScheduler(dependencies.ScannerRepository),
+	).Handle)
 
 	ginEngine.Any("/api/v1/clients/:clientId", handlers.NewClientsApiHandler(
 		dependencies.GoogleClientRepository,

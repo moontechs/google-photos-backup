@@ -17,7 +17,8 @@ type rescanHandler struct {
 }
 
 type requestData struct {
-	Email string `json:"email" binding:"required"`
+	Type  string `json:"type" binding:"required,oneof=photos drive"`
+	Email string `json:"email" binding:"required,email"`
 }
 
 func NewRescanHandler(
@@ -28,9 +29,15 @@ func NewRescanHandler(
 }
 
 func (h *rescanHandler) Handle(c *gin.Context) {
+	if c.Request.Method != http.MethodPost {
+		c.JSON(http.StatusMethodNotAllowed, gin.H{})
+
+		return
+	}
+
 	var requestData requestData
 
-	if err := c.BindJSON(&requestData); err != nil {
+	if err := c.ShouldBindJSON(&requestData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		log.Error(fmt.Errorf("json bind request: %w", err))
 
@@ -46,7 +53,13 @@ func (h *rescanHandler) Handle(c *gin.Context) {
 	}
 
 	if exist {
-		h.scheduler.ScheduleRescan(requestData.Email)
+		err = h.scheduler.ScheduleRescan(requestData.Type, requestData.Email)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Could not schedule rescan"})
+			log.Error(fmt.Errorf("schedule rescan: %w", err))
+
+			return
+		}
 
 		c.JSON(http.StatusOK, gin.H{})
 

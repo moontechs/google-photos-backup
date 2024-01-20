@@ -15,6 +15,8 @@ type SettingsData struct {
 	PhotosScannerJobDelay    time.Duration `json:"photos_scanner_job_delay"`
 	PhotosDownloaderJobDelay time.Duration `json:"photos_downloader_job_delay"`
 	Host                     string        `json:"host"`
+	PhotosBackupEnabled      bool          `json:"photos_backup_enabled"`
+	DriveBackupEnabled       bool          `json:"drive_backup_enabled"`
 }
 
 type settings struct {
@@ -34,6 +36,8 @@ func (c settings) Init() error {
 		PhotosScannerJobDelay:    time.Minute,
 		PhotosDownloaderJobDelay: time.Minute,
 		Host:                     "http://localhost:8080",
+		PhotosBackupEnabled:      true,
+		DriveBackupEnabled:       true,
 	}
 
 	defaultSettings, err := json.Marshal(defaultSettingsData)
