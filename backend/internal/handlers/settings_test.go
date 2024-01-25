@@ -19,7 +19,7 @@ func TestSettingsHandle(t *testing.T) {
 		fakeSettingsRepository := new(settingsfakes.FakeRepository)
 		handler := NewSettingsHandler(fakeSettingsRepository)
 
-		fakeSettingsRepository.FindReturns([]byte(`{"root_path": "/root/path", "photos_scanner_job_delay": 60000000000, "photos_downloader_job_delay": 120000000000, "host": "http://localhost:8080", "photos_backup_enabled": true, "drive_backup_enabled": true}`), nil)
+		fakeSettingsRepository.FindReturns([]byte(`{"rootPath": "/root/path", "photosScannerJobDelay": 60000000000, "photosDownloaderJobDelay": 120000000000, "host": "http://localhost:8080", "photosBackupEnabled": true, "driveBackupEnabled": true}`), nil)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -28,7 +28,7 @@ func TestSettingsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, `{"data":{"root_path":"/root/path","photos_scanner_job_delay":1,"photos_downloader_job_delay":2,"host":"http://localhost:8080","photos_backup_enabled":true,"drive_backup_enabled":true}}`, w.Body.String())
+		assert.Equal(t, `{"data":{"rootPath":"/root/path","photosScannerJobDelay":1,"photosDownloaderJobDelay":2,"host":"http://localhost:8080","photosBackupEnabled":true,"driveBackupEnabled":true}}`, w.Body.String())
 	})
 
 	t.Run("update settings", func(t *testing.T) {
@@ -38,16 +38,16 @@ func TestSettingsHandle(t *testing.T) {
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 		c.Request, _ = http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/settings", bytes.NewBuffer(
-			[]byte(`{"root_path": "/root/path", "photos_scanner_job_delay": 1, "photos_downloader_job_delay": 5, "host": "http://localhost:8080", "photos_backup_enabled": true, "drive_backup_enabled": true}`),
+			[]byte(`{"rootPath": "/root/path", "photosScannerJobDelay": 1, "photosDownloaderJobDelay": 5, "host": "http://localhost:8080", "photosBackupEnabled": true, "driveBackupEnabled": true}`),
 		))
 
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, `{"data":{"root_path":"/root/path","photos_scanner_job_delay":1,"photos_downloader_job_delay":5,"host":"http://localhost:8080","photos_backup_enabled":true,"drive_backup_enabled":true}}`, w.Body.String())
+		assert.Equal(t, `{"data":{"rootPath":"/root/path","photosScannerJobDelay":1,"photosDownloaderJobDelay":5,"host":"http://localhost:8080","photosBackupEnabled":true,"driveBackupEnabled":true}}`, w.Body.String())
 
 		settingsJson := fakeSettingsRepository.SaveArgsForCall(0)
-		assert.Equal(t, `{"root_path":"/root/path","photos_scanner_job_delay":60000000000,"photos_downloader_job_delay":300000000000,"host":"http://localhost:8080","photos_backup_enabled":true,"drive_backup_enabled":true}`, string(settingsJson))
+		assert.Equal(t, `{"rootPath":"/root/path","photosScannerJobDelay":60000000000,"photosDownloaderJobDelay":300000000000,"host":"http://localhost:8080","photosBackupEnabled":true,"driveBackupEnabled":true}`, string(settingsJson))
 	})
 
 	t.Run("update settings validation", func(t *testing.T) {

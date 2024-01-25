@@ -11,12 +11,12 @@ type SettingsInitializer interface {
 }
 
 type SettingsData struct {
-	RootPath                 string        `json:"root_path"`
-	PhotosScannerJobDelay    time.Duration `json:"photos_scanner_job_delay"`
-	PhotosDownloaderJobDelay time.Duration `json:"photos_downloader_job_delay"`
+	RootPath                 string        `json:"rootPath"`
+	PhotosScannerJobDelay    time.Duration `json:"photosScannerJobDelay"`
+	PhotosDownloaderJobDelay time.Duration `json:"photosDownloaderJobDelay"`
 	Host                     string        `json:"host"`
-	PhotosBackupEnabled      bool          `json:"photos_backup_enabled"`
-	DriveBackupEnabled       bool          `json:"drive_backup_enabled"`
+	PhotosBackupEnabled      bool          `json:"photosBackupEnabled"`
+	DriveBackupEnabled       bool          `json:"driveBackupEnabled"`
 }
 
 type settings struct {

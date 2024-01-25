@@ -25,7 +25,7 @@ func TestRedirectUrlHandle(t *testing.T) {
 		)
 		handler := NewGoogleRedirectUrlHandler(googleAuth)
 
-		fakeGoogleClientRepository.FindReturns([]byte(`{"id":"id1","secret":"secret1","redirect_url":"http://localhost:8080/redirect_url/id1"}`), nil)
+		fakeGoogleClientRepository.FindReturns([]byte(`{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1"}`), nil)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)

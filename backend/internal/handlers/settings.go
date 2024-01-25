@@ -17,12 +17,12 @@ type settingsApiHandler struct {
 }
 
 type settingsUpdateRequest struct {
-	RootPath                 string `json:"root_path" binding:"required,ascii"`
-	PhotosScannerJobDelay    int64  `json:"photos_scanner_job_delay" binding:"required,numeric"`
-	PhotosDownloaderJobDelay int64  `json:"photos_downloader_job_delay" binding:"required,numeric"`
+	RootPath                 string `json:"rootPath" binding:"required,ascii"`
+	PhotosScannerJobDelay    int64  `json:"photosScannerJobDelay" binding:"required,numeric"`
+	PhotosDownloaderJobDelay int64  `json:"photosDownloaderJobDelay" binding:"required,numeric"`
 	Host                     string `json:"host" binding:"required,ascii"`
-	PhotosBackupEnabled      bool   `json:"photos_backup_enabled" binding:"required,boolean"`
-	DriveBackupEnabled       bool   `json:"drive_backup_enabled" binding:"required,boolean"`
+	PhotosBackupEnabled      bool   `json:"photosBackupEnabled" binding:"required,boolean"`
+	DriveBackupEnabled       bool   `json:"driveBackupEnabled" binding:"required,boolean"`
 }
 
 func NewSettingsHandler(settingsRepository settings.Repository) *settingsApiHandler {
