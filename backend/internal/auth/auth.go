@@ -29,8 +29,10 @@ type googleAuth struct {
 }
 
 type UserInfo struct {
-	Picture string `json:"picture"`
-	Email   string `json:"email"`
+	Picture   string `json:"picture"`
+	Email     string `json:"email"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type OauthClientData struct {
@@ -133,6 +135,7 @@ func (g googleAuth) createConfig(clientId string) (oauth2.Config, error) {
 		RedirectURL:  googleClientData.RedirectURL,
 		Scopes: []string{
 			"https://www.googleapis.com/auth/photoslibrary.readonly",
+			"https://www.googleapis.com/auth/drive.readonly",
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
 		Endpoint: oauth2.Endpoint{},

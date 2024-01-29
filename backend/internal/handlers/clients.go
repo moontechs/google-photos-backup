@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"google-backup/internal/account"
 	"google-backup/internal/google_client"
 	"google-backup/internal/settings"
 
@@ -13,6 +14,7 @@ import (
 )
 
 type clientsApiHandler struct {
+	accountRepository      account.Repository
 	googleClientRepository google_client.Repository
 	settingsRepository     settings.Repository
 }
@@ -23,10 +25,12 @@ type updateClientRequest struct {
 }
 
 func NewClientsApiHandler(
+	accountRepository account.Repository,
 	googleClientRepository google_client.Repository,
 	settingsRepository settings.Repository,
 ) *clientsApiHandler {
 	return &clientsApiHandler{
+		accountRepository:      accountRepository,
 		googleClientRepository: googleClientRepository,
 		settingsRepository:     settingsRepository,
 	}
@@ -66,11 +70,10 @@ func (h *clientsApiHandler) handleGet(c *gin.Context) {
 		clientsData := make([]google_client.ClientData, 0, len(clients))
 
 		for _, client := range clients {
-			var clientData google_client.ClientData
-			err = json.Unmarshal(client, &clientData)
+			clientData, err := h.getClientData(client)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-				log.Error(fmt.Errorf("google clients: handle get all: unmarshal: %w", err))
+				log.Error(fmt.Errorf("google clients: handle get all: get client data: %w", err))
 
 				return
 			}
@@ -97,11 +100,10 @@ func (h *clientsApiHandler) handleGet(c *gin.Context) {
 		return
 	}
 
-	var clientData google_client.ClientData
-	err = json.Unmarshal(client, &clientData)
+	clientData, err := h.getClientData(client)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
-		log.Error(fmt.Errorf("google clients: handle get: unmarshal: %w", err))
+		log.Error(fmt.Errorf("google clients: handle get: get client data: %w", err))
 
 		return
 	}
@@ -189,4 +191,49 @@ func (h *clientsApiHandler) generateRedirectUrl(clientID string) (string, error)
 	}
 
 	return fmt.Sprintf("%s/auth/google/callback/%s", settingsData.Host, clientID), nil
+}
+
+func (h *clientsApiHandler) getClientData(client []byte) (google_client.ClientData, error) {
+	var clientData google_client.ClientData
+
+	err := json.Unmarshal(client, &clientData)
+	if err != nil {
+		return google_client.ClientData{}, fmt.Errorf("unmarshal client data: %w", err)
+	}
+
+	assignedAccountsJson, err := h.googleClientRepository.FindAssignedAccounts(clientData.ID)
+	if err != nil {
+		return google_client.ClientData{}, fmt.Errorf("find assigned accounts: %w", err)
+	}
+
+	if assignedAccountsJson == nil {
+		return clientData, nil
+	}
+
+	var assignedAccountEmails []string
+	err = json.Unmarshal(assignedAccountsJson, &assignedAccountEmails)
+	if err != nil {
+		return google_client.ClientData{}, fmt.Errorf("unmarshal assigned accounts: %w", err)
+	}
+
+	for _, email := range assignedAccountEmails {
+		accountJson, err := h.accountRepository.FindAccount(email)
+		if err != nil {
+			return google_client.ClientData{}, fmt.Errorf("find account: %w", err)
+		}
+
+		if accountJson == nil {
+			continue
+		}
+
+		var accountData account.AccountData
+		err = json.Unmarshal(accountJson, &accountData)
+		if err != nil {
+			return google_client.ClientData{}, fmt.Errorf("unmarshal account data: %w", err)
+		}
+
+		clientData.AssignedAccounts = append(clientData.AssignedAccounts, accountData)
+	}
+
+	return clientData, nil
 }

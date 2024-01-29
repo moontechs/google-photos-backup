@@ -32,6 +32,32 @@ type FakeRepository struct {
 	createUpdateLimitsReturnsOnCall map[int]struct {
 		result1 error
 	}
+	FindAccountStub        func(string) ([]byte, error)
+	findAccountMutex       sync.RWMutex
+	findAccountArgsForCall []struct {
+		arg1 string
+	}
+	findAccountReturns struct {
+		result1 []byte
+		result2 error
+	}
+	findAccountReturnsOnCall map[int]struct {
+		result1 []byte
+		result2 error
+	}
+	FindTokenByEmailStub        func(string) ([]byte, error)
+	findTokenByEmailMutex       sync.RWMutex
+	findTokenByEmailArgsForCall []struct {
+		arg1 string
+	}
+	findTokenByEmailReturns struct {
+		result1 []byte
+		result2 error
+	}
+	findTokenByEmailReturnsOnCall map[int]struct {
+		result1 []byte
+		result2 error
+	}
 	GetAccountOauthClientNameStub        func(string) ([]byte, error)
 	getAccountOauthClientNameMutex       sync.RWMutex
 	getAccountOauthClientNameArgsForCall []struct {
@@ -70,29 +96,16 @@ type FakeRepository struct {
 		result1 []byte
 		result2 error
 	}
-	GetTokenByEmailStub        func(string) ([]byte, error)
-	getTokenByEmailMutex       sync.RWMutex
-	getTokenByEmailArgsForCall []struct {
-		arg1 string
-	}
-	getTokenByEmailReturns struct {
-		result1 []byte
-		result2 error
-	}
-	getTokenByEmailReturnsOnCall map[int]struct {
-		result1 []byte
-		result2 error
-	}
-	SaveAccountOauthClientNameStub        func(string, []byte) error
-	saveAccountOauthClientNameMutex       sync.RWMutex
-	saveAccountOauthClientNameArgsForCall []struct {
+	SaveAccountStub        func(string, []byte) error
+	saveAccountMutex       sync.RWMutex
+	saveAccountArgsForCall []struct {
 		arg1 string
 		arg2 []byte
 	}
-	saveAccountOauthClientNameReturns struct {
+	saveAccountReturns struct {
 		result1 error
 	}
-	saveAccountOauthClientNameReturnsOnCall map[int]struct {
+	saveAccountReturnsOnCall map[int]struct {
 		result1 error
 	}
 	SaveTokenStub        func(string, []byte) error
@@ -240,6 +253,134 @@ func (fake *FakeRepository) CreateUpdateLimitsReturnsOnCall(i int, result1 error
 	fake.createUpdateLimitsReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
+}
+
+func (fake *FakeRepository) FindAccount(arg1 string) ([]byte, error) {
+	fake.findAccountMutex.Lock()
+	ret, specificReturn := fake.findAccountReturnsOnCall[len(fake.findAccountArgsForCall)]
+	fake.findAccountArgsForCall = append(fake.findAccountArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.FindAccountStub
+	fakeReturns := fake.findAccountReturns
+	fake.recordInvocation("FindAccount", []interface{}{arg1})
+	fake.findAccountMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRepository) FindAccountCallCount() int {
+	fake.findAccountMutex.RLock()
+	defer fake.findAccountMutex.RUnlock()
+	return len(fake.findAccountArgsForCall)
+}
+
+func (fake *FakeRepository) FindAccountCalls(stub func(string) ([]byte, error)) {
+	fake.findAccountMutex.Lock()
+	defer fake.findAccountMutex.Unlock()
+	fake.FindAccountStub = stub
+}
+
+func (fake *FakeRepository) FindAccountArgsForCall(i int) string {
+	fake.findAccountMutex.RLock()
+	defer fake.findAccountMutex.RUnlock()
+	argsForCall := fake.findAccountArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeRepository) FindAccountReturns(result1 []byte, result2 error) {
+	fake.findAccountMutex.Lock()
+	defer fake.findAccountMutex.Unlock()
+	fake.FindAccountStub = nil
+	fake.findAccountReturns = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) FindAccountReturnsOnCall(i int, result1 []byte, result2 error) {
+	fake.findAccountMutex.Lock()
+	defer fake.findAccountMutex.Unlock()
+	fake.FindAccountStub = nil
+	if fake.findAccountReturnsOnCall == nil {
+		fake.findAccountReturnsOnCall = make(map[int]struct {
+			result1 []byte
+			result2 error
+		})
+	}
+	fake.findAccountReturnsOnCall[i] = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) FindTokenByEmail(arg1 string) ([]byte, error) {
+	fake.findTokenByEmailMutex.Lock()
+	ret, specificReturn := fake.findTokenByEmailReturnsOnCall[len(fake.findTokenByEmailArgsForCall)]
+	fake.findTokenByEmailArgsForCall = append(fake.findTokenByEmailArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.FindTokenByEmailStub
+	fakeReturns := fake.findTokenByEmailReturns
+	fake.recordInvocation("FindTokenByEmail", []interface{}{arg1})
+	fake.findTokenByEmailMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRepository) FindTokenByEmailCallCount() int {
+	fake.findTokenByEmailMutex.RLock()
+	defer fake.findTokenByEmailMutex.RUnlock()
+	return len(fake.findTokenByEmailArgsForCall)
+}
+
+func (fake *FakeRepository) FindTokenByEmailCalls(stub func(string) ([]byte, error)) {
+	fake.findTokenByEmailMutex.Lock()
+	defer fake.findTokenByEmailMutex.Unlock()
+	fake.FindTokenByEmailStub = stub
+}
+
+func (fake *FakeRepository) FindTokenByEmailArgsForCall(i int) string {
+	fake.findTokenByEmailMutex.RLock()
+	defer fake.findTokenByEmailMutex.RUnlock()
+	argsForCall := fake.findTokenByEmailArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeRepository) FindTokenByEmailReturns(result1 []byte, result2 error) {
+	fake.findTokenByEmailMutex.Lock()
+	defer fake.findTokenByEmailMutex.Unlock()
+	fake.FindTokenByEmailStub = nil
+	fake.findTokenByEmailReturns = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) FindTokenByEmailReturnsOnCall(i int, result1 []byte, result2 error) {
+	fake.findTokenByEmailMutex.Lock()
+	defer fake.findTokenByEmailMutex.Unlock()
+	fake.FindTokenByEmailStub = nil
+	if fake.findTokenByEmailReturnsOnCall == nil {
+		fake.findTokenByEmailReturnsOnCall = make(map[int]struct {
+			result1 []byte
+			result2 error
+		})
+	}
+	fake.findTokenByEmailReturnsOnCall[i] = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeRepository) GetAccountOauthClientName(arg1 string) ([]byte, error) {
@@ -426,86 +567,22 @@ func (fake *FakeRepository) GetLimitsReturnsOnCall(i int, result1 []byte, result
 	}{result1, result2}
 }
 
-func (fake *FakeRepository) GetTokenByEmail(arg1 string) ([]byte, error) {
-	fake.getTokenByEmailMutex.Lock()
-	ret, specificReturn := fake.getTokenByEmailReturnsOnCall[len(fake.getTokenByEmailArgsForCall)]
-	fake.getTokenByEmailArgsForCall = append(fake.getTokenByEmailArgsForCall, struct {
-		arg1 string
-	}{arg1})
-	stub := fake.GetTokenByEmailStub
-	fakeReturns := fake.getTokenByEmailReturns
-	fake.recordInvocation("GetTokenByEmail", []interface{}{arg1})
-	fake.getTokenByEmailMutex.Unlock()
-	if stub != nil {
-		return stub(arg1)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeRepository) GetTokenByEmailCallCount() int {
-	fake.getTokenByEmailMutex.RLock()
-	defer fake.getTokenByEmailMutex.RUnlock()
-	return len(fake.getTokenByEmailArgsForCall)
-}
-
-func (fake *FakeRepository) GetTokenByEmailCalls(stub func(string) ([]byte, error)) {
-	fake.getTokenByEmailMutex.Lock()
-	defer fake.getTokenByEmailMutex.Unlock()
-	fake.GetTokenByEmailStub = stub
-}
-
-func (fake *FakeRepository) GetTokenByEmailArgsForCall(i int) string {
-	fake.getTokenByEmailMutex.RLock()
-	defer fake.getTokenByEmailMutex.RUnlock()
-	argsForCall := fake.getTokenByEmailArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeRepository) GetTokenByEmailReturns(result1 []byte, result2 error) {
-	fake.getTokenByEmailMutex.Lock()
-	defer fake.getTokenByEmailMutex.Unlock()
-	fake.GetTokenByEmailStub = nil
-	fake.getTokenByEmailReturns = struct {
-		result1 []byte
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRepository) GetTokenByEmailReturnsOnCall(i int, result1 []byte, result2 error) {
-	fake.getTokenByEmailMutex.Lock()
-	defer fake.getTokenByEmailMutex.Unlock()
-	fake.GetTokenByEmailStub = nil
-	if fake.getTokenByEmailReturnsOnCall == nil {
-		fake.getTokenByEmailReturnsOnCall = make(map[int]struct {
-			result1 []byte
-			result2 error
-		})
-	}
-	fake.getTokenByEmailReturnsOnCall[i] = struct {
-		result1 []byte
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRepository) SaveAccountOauthClientName(arg1 string, arg2 []byte) error {
+func (fake *FakeRepository) SaveAccount(arg1 string, arg2 []byte) error {
 	var arg2Copy []byte
 	if arg2 != nil {
 		arg2Copy = make([]byte, len(arg2))
 		copy(arg2Copy, arg2)
 	}
-	fake.saveAccountOauthClientNameMutex.Lock()
-	ret, specificReturn := fake.saveAccountOauthClientNameReturnsOnCall[len(fake.saveAccountOauthClientNameArgsForCall)]
-	fake.saveAccountOauthClientNameArgsForCall = append(fake.saveAccountOauthClientNameArgsForCall, struct {
+	fake.saveAccountMutex.Lock()
+	ret, specificReturn := fake.saveAccountReturnsOnCall[len(fake.saveAccountArgsForCall)]
+	fake.saveAccountArgsForCall = append(fake.saveAccountArgsForCall, struct {
 		arg1 string
 		arg2 []byte
 	}{arg1, arg2Copy})
-	stub := fake.SaveAccountOauthClientNameStub
-	fakeReturns := fake.saveAccountOauthClientNameReturns
-	fake.recordInvocation("SaveAccountOauthClientName", []interface{}{arg1, arg2Copy})
-	fake.saveAccountOauthClientNameMutex.Unlock()
+	stub := fake.SaveAccountStub
+	fakeReturns := fake.saveAccountReturns
+	fake.recordInvocation("SaveAccount", []interface{}{arg1, arg2Copy})
+	fake.saveAccountMutex.Unlock()
 	if stub != nil {
 		return stub(arg1, arg2)
 	}
@@ -515,44 +592,44 @@ func (fake *FakeRepository) SaveAccountOauthClientName(arg1 string, arg2 []byte)
 	return fakeReturns.result1
 }
 
-func (fake *FakeRepository) SaveAccountOauthClientNameCallCount() int {
-	fake.saveAccountOauthClientNameMutex.RLock()
-	defer fake.saveAccountOauthClientNameMutex.RUnlock()
-	return len(fake.saveAccountOauthClientNameArgsForCall)
+func (fake *FakeRepository) SaveAccountCallCount() int {
+	fake.saveAccountMutex.RLock()
+	defer fake.saveAccountMutex.RUnlock()
+	return len(fake.saveAccountArgsForCall)
 }
 
-func (fake *FakeRepository) SaveAccountOauthClientNameCalls(stub func(string, []byte) error) {
-	fake.saveAccountOauthClientNameMutex.Lock()
-	defer fake.saveAccountOauthClientNameMutex.Unlock()
-	fake.SaveAccountOauthClientNameStub = stub
+func (fake *FakeRepository) SaveAccountCalls(stub func(string, []byte) error) {
+	fake.saveAccountMutex.Lock()
+	defer fake.saveAccountMutex.Unlock()
+	fake.SaveAccountStub = stub
 }
 
-func (fake *FakeRepository) SaveAccountOauthClientNameArgsForCall(i int) (string, []byte) {
-	fake.saveAccountOauthClientNameMutex.RLock()
-	defer fake.saveAccountOauthClientNameMutex.RUnlock()
-	argsForCall := fake.saveAccountOauthClientNameArgsForCall[i]
+func (fake *FakeRepository) SaveAccountArgsForCall(i int) (string, []byte) {
+	fake.saveAccountMutex.RLock()
+	defer fake.saveAccountMutex.RUnlock()
+	argsForCall := fake.saveAccountArgsForCall[i]
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeRepository) SaveAccountOauthClientNameReturns(result1 error) {
-	fake.saveAccountOauthClientNameMutex.Lock()
-	defer fake.saveAccountOauthClientNameMutex.Unlock()
-	fake.SaveAccountOauthClientNameStub = nil
-	fake.saveAccountOauthClientNameReturns = struct {
+func (fake *FakeRepository) SaveAccountReturns(result1 error) {
+	fake.saveAccountMutex.Lock()
+	defer fake.saveAccountMutex.Unlock()
+	fake.SaveAccountStub = nil
+	fake.saveAccountReturns = struct {
 		result1 error
 	}{result1}
 }
 
-func (fake *FakeRepository) SaveAccountOauthClientNameReturnsOnCall(i int, result1 error) {
-	fake.saveAccountOauthClientNameMutex.Lock()
-	defer fake.saveAccountOauthClientNameMutex.Unlock()
-	fake.SaveAccountOauthClientNameStub = nil
-	if fake.saveAccountOauthClientNameReturnsOnCall == nil {
-		fake.saveAccountOauthClientNameReturnsOnCall = make(map[int]struct {
+func (fake *FakeRepository) SaveAccountReturnsOnCall(i int, result1 error) {
+	fake.saveAccountMutex.Lock()
+	defer fake.saveAccountMutex.Unlock()
+	fake.SaveAccountStub = nil
+	if fake.saveAccountReturnsOnCall == nil {
+		fake.saveAccountReturnsOnCall = make(map[int]struct {
 			result1 error
 		})
 	}
-	fake.saveAccountOauthClientNameReturnsOnCall[i] = struct {
+	fake.saveAccountReturnsOnCall[i] = struct {
 		result1 error
 	}{result1}
 }
@@ -631,16 +708,18 @@ func (fake *FakeRepository) Invocations() map[string][][]interface{} {
 	defer fake.accountExistMutex.RUnlock()
 	fake.createUpdateLimitsMutex.RLock()
 	defer fake.createUpdateLimitsMutex.RUnlock()
+	fake.findAccountMutex.RLock()
+	defer fake.findAccountMutex.RUnlock()
+	fake.findTokenByEmailMutex.RLock()
+	defer fake.findTokenByEmailMutex.RUnlock()
 	fake.getAccountOauthClientNameMutex.RLock()
 	defer fake.getAccountOauthClientNameMutex.RUnlock()
 	fake.getAccountsMutex.RLock()
 	defer fake.getAccountsMutex.RUnlock()
 	fake.getLimitsMutex.RLock()
 	defer fake.getLimitsMutex.RUnlock()
-	fake.getTokenByEmailMutex.RLock()
-	defer fake.getTokenByEmailMutex.RUnlock()
-	fake.saveAccountOauthClientNameMutex.RLock()
-	defer fake.saveAccountOauthClientNameMutex.RUnlock()
+	fake.saveAccountMutex.RLock()
+	defer fake.saveAccountMutex.RUnlock()
 	fake.saveTokenMutex.RLock()
 	defer fake.saveTokenMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}

@@ -98,6 +98,22 @@ func (h *googleCallbackHandler) Handle(c *gin.Context) {
 		return
 	}
 
+	userInfoJson, err := json.Marshal(userInfo)
+	if err != nil {
+		log.Error(fmt.Errorf("marshal user info: %w", err))
+
+		c.String(http.StatusInternalServerError, "Could not marshal user info")
+
+		return
+	}
+
+	err = h.accountRepository.SaveAccount(userInfo.Email, userInfoJson)
+	if err != nil {
+		log.Error(fmt.Errorf("save account: %w", err))
+
+		c.String(http.StatusInternalServerError, "Could not save user info")
+	}
+
 	host, err := h.getHostFromSettings()
 	if err != nil {
 		log.Error(fmt.Errorf("get host from settings: %w", err))

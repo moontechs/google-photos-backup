@@ -3,7 +3,6 @@ package account
 import (
 	"errors"
 	"fmt"
-	"slices"
 	"strconv"
 
 	"go.etcd.io/bbolt"
@@ -12,20 +11,18 @@ import (
 const (
 	accountLimitsKey   = "limits"
 	oauthClientNameKey = "oauth_client_name"
-	tokenKey           = "token"
+	tokensBucketName   = "tokens"
+	accountsBucketName = "accounts"
 )
-
-var ignoreKeys = []string{
-	"app",
-}
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Repository
 type Repository interface {
 	SaveToken(email string, token []byte) error
-	SaveAccountOauthClientName(email string, clientName []byte) error
+	SaveAccount(email string, userInfo []byte) error
 	GetAccounts() ([][]byte, error)
+	FindAccount(email string) ([]byte, error)
 	AccountExist(email string) (bool, error)
-	GetTokenByEmail(email string) ([]byte, error)
+	FindTokenByEmail(email string) ([]byte, error)
 	CreateUpdateLimits(email string, limits []byte) error
 	GetLimits(email string) ([]byte, error)
 	GetAccountOauthClientName(email string) ([]byte, error)
@@ -41,12 +38,23 @@ func NewRepository(db *bbolt.DB) *repo {
 
 func (r *repo) SaveToken(email string, token []byte) error {
 	return r.DB.Update(func(tx *bbolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(email))
+		bucket, err := tx.CreateBucketIfNotExists([]byte(tokensBucketName))
 		if err != nil {
 			return err
 		}
 
-		return bucket.Put([]byte(tokenKey), token)
+		return bucket.Put([]byte(email), token)
+	})
+}
+
+func (r *repo) SaveAccount(email string, userInfo []byte) error {
+	return r.DB.Update(func(tx *bbolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(accountsBucketName))
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put([]byte(email), userInfo)
 	})
 }
 
@@ -64,12 +72,14 @@ func (r *repo) SaveAccountOauthClientName(email string, clientName []byte) error
 func (r *repo) AccountExist(email string) (bool, error) {
 	var exist bool
 	err := r.DB.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(email))
+		bucket := tx.Bucket([]byte(accountsBucketName))
 		if bucket == nil {
 			exist = false
-		} else {
-			exist = true
+
+			return nil
 		}
+
+		exist = bucket.Get([]byte(email)) != nil
 
 		return nil
 	})
@@ -77,16 +87,35 @@ func (r *repo) AccountExist(email string) (bool, error) {
 	return exist, err
 }
 
-func (r *repo) GetTokenByEmail(email string) ([]byte, error) {
-	var token []byte
+func (r *repo) FindAccount(email string) ([]byte, error) {
+	var account []byte
+	account = nil
 
 	err := r.DB.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(email))
+		bucket := tx.Bucket([]byte(accountsBucketName))
 		if bucket == nil {
-			return errors.New("account not found")
+			return nil
 		}
 
-		token = bucket.Get([]byte("token"))
+		account = bucket.Get([]byte(email))
+
+		return nil
+	})
+
+	return account, err
+}
+
+func (r *repo) FindTokenByEmail(email string) ([]byte, error) {
+	var token []byte
+	token = nil
+
+	err := r.DB.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(tokensBucketName))
+		if bucket == nil {
+			return nil
+		}
+
+		token = bucket.Get([]byte(email))
 
 		return nil
 	})
@@ -133,15 +162,18 @@ func (r *repo) GetAccounts() ([][]byte, error) {
 	var accounts [][]byte
 
 	err := r.DB.View(func(tx *bbolt.Tx) error {
-		return tx.ForEach(func(name []byte, b *bbolt.Bucket) error {
-			if slices.Contains(ignoreKeys, string(name)) {
-				return nil
-			}
+		bucket := tx.Bucket([]byte(accountsBucketName))
+		if bucket == nil {
+			return nil
+		}
 
-			accounts = append(accounts, name)
+		bucket.ForEach(func(k, v []byte) error {
+			accounts = append(accounts, v)
 
 			return nil
 		})
+
+		return nil
 	})
 
 	return accounts, err

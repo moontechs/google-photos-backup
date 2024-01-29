@@ -13,6 +13,13 @@ type Account interface {
 	GetTokenByEmail(email string) (oauth2.Token, error)
 }
 
+type AccountData struct {
+	Email     string `json:"email"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Picture   string `json:"picture"`
+}
+
 type account struct {
 	repository Repository
 }
@@ -39,7 +46,7 @@ func (a account) GetAccountOauthClientName(email string) (string, error) {
 }
 
 func (a account) GetTokenByEmail(email string) (oauth2.Token, error) {
-	token, err := a.repository.GetTokenByEmail(email)
+	token, err := a.repository.FindTokenByEmail(email)
 	if err != nil {
 		return oauth2.Token{}, fmt.Errorf("get token by email: %w", err)
 	}

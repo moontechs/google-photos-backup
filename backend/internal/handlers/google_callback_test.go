@@ -26,8 +26,10 @@ func TestGoogleCallbackHandle(t *testing.T) {
 		handler := NewGoogleCallbackHandler(fakeAccountRepository, fakeGoogleClientRepository, fakeSettingsRepository, fakeGoogleAuth)
 
 		fakeGoogleAuth.GetUserInfoReturns(auth.UserInfo{
-			Picture: "picture",
-			Email:   "email",
+			Picture:   "picture",
+			Email:     "email",
+			FirstName: "firstName",
+			LastName:  "lastName",
 		}, nil)
 
 		fakeSettingsRepository.FindReturns([]byte(`{"host": "http://localhost:8080"}`), nil)
@@ -62,8 +64,10 @@ func TestGoogleCallbackHandle(t *testing.T) {
 		handler := NewGoogleCallbackHandler(fakeAccountRepository, fakeGoogleClientRepository, fakeSettingsRepository, fakeGoogleAuth)
 
 		fakeGoogleAuth.GetUserInfoReturns(auth.UserInfo{
-			Picture: "picture",
-			Email:   "email",
+			Picture:   "picture",
+			Email:     "email",
+			FirstName: "firstName",
+			LastName:  "lastName",
 		}, nil)
 
 		fakeSettingsRepository.FindReturns([]byte(`{"host": "http://localhost:8080"}`), nil)
