@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -43,5 +44,9 @@ func (h *googleRedirectUrlHandler) Handle(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": redirctUrl})
+	rawMessage := json.RawMessage([]byte(`{"data": "` + redirctUrl + `"}`))
+
+	// needs to return unescaped string to be able to redirect or open in a browser
+	c.Header("Content-Type", "application/json")
+	c.String(http.StatusOK, string(rawMessage))
 }

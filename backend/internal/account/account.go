@@ -14,10 +14,10 @@ type Account interface {
 }
 
 type AccountData struct {
-	Email     string `json:"email"`
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	Picture   string `json:"picture"`
+	Email      string `json:"email"`
+	GivenName  string `json:"givenName"`
+	FamilyName string `json:"familyName"`
+	Picture    string `json:"picture"`
 }
 
 type account struct {

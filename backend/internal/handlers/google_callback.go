@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"google-backup/internal/account"
 	"google-backup/internal/auth"
@@ -148,6 +149,7 @@ func (h *googleCallbackHandler) assigneAccountToClient(clientId string, email st
 	}
 
 	emailsSlice = append(emailsSlice, email)
+	emailsSlice = slices.Compact(emailsSlice)
 
 	emails, err = json.Marshal(emailsSlice)
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"google-backup/internal/google_client"
 
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Auth
@@ -23,22 +24,21 @@ type Auth interface {
 }
 
 type googleAuth struct {
-	config                 oauth2.Config
 	repository             Repository
 	googleClientRepository google_client.Repository
 }
 
 type UserInfo struct {
-	Picture   string `json:"picture"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	Picture    string `json:"picture"`
+	Email      string `json:"email"`
+	GivenName  string `json:"givenName"`
+	FamilyName string `json:"familyName"`
 }
 
 type OauthClientData struct {
-	ClientID     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	RedirectURL  string `json:"redirect_url"`
+	ClientID     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	RedirectURL  string `json:"redirectUrl"`
 }
 
 func NewGoogleAuth(repository Repository, googleClientRepository google_client.Repository) googleAuth {
@@ -51,7 +51,7 @@ func NewGoogleAuth(repository Repository, googleClientRepository google_client.R
 func (g googleAuth) GetRedirectUrl(clientId string) (string, error) {
 	gConfig, err := g.createConfig(clientId)
 	if err != nil {
-		return "", fmt.Errorf("create config: %w", err)
+		return "", fmt.Errorf("create config during create redirect url: %w", err)
 	}
 
 	return gConfig.AuthCodeURL("state", oauth2.AccessTypeOffline, oauth2.ApprovalForce), nil
@@ -96,12 +96,22 @@ func (g googleAuth) GetUserInfo(client *http.Client) (UserInfo, error) {
 		return UserInfo{}, fmt.Errorf("read user info body: %w", err)
 	}
 
-	var result UserInfo
-	if err := json.Unmarshal(data, &result); err != nil {
+	var response struct {
+		Email      string `json:"email"`
+		GivenName  string `json:"given_name"`
+		FamilyName string `json:"family_name"`
+		Picture    string `json:"picture"`
+	}
+	if err := json.Unmarshal(data, &response); err != nil {
 		return UserInfo{}, fmt.Errorf("unmarshal user info: %w", err)
 	}
 
-	return result, nil
+	return UserInfo{
+		Email:      response.Email,
+		GivenName:  response.GivenName,
+		FamilyName: response.FamilyName,
+		Picture:    response.Picture,
+	}, nil
 }
 
 func (g googleAuth) SaveOauthClientData(email string, oauthClientData OauthClientData) error {
@@ -137,7 +147,8 @@ func (g googleAuth) createConfig(clientId string) (oauth2.Config, error) {
 			"https://www.googleapis.com/auth/photoslibrary.readonly",
 			"https://www.googleapis.com/auth/drive.readonly",
 			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googleapis.com/auth/userinfo.email",
 		},
-		Endpoint: oauth2.Endpoint{},
+		Endpoint: google.Endpoint,
 	}, nil
 }

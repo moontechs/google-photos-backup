@@ -40,7 +40,7 @@ func TestRedirectUrlHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, `{"data":"?access_type=offline\u0026client_id=id1\u0026prompt=consent\u0026redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fredirect_url%2Fid1\u0026response_type=code\u0026scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fphotoslibrary.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile\u0026state=state"}`, w.Body.String())
+		assert.Equal(t, `{"data": "https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=id1&prompt=consent&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fredirect_url%2Fid1&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fphotoslibrary.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=state"}`, w.Body.String())
 	})
 
 	t.Run("get redirect url client not found", func(t *testing.T) {

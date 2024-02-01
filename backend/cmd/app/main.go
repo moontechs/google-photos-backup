@@ -66,6 +66,12 @@ func createGinServer(dependencies dependencies.Dependencies) *gin.Engine {
 		scanner.NewScheduler(dependencies.ScannerRepository),
 	).Handle)
 
+	ginEngine.Any("/api/v1/clients", handlers.NewClientsApiHandler(
+		dependencies.AccountRepository,
+		dependencies.GoogleClientRepository,
+		dependencies.SettingsRepository,
+	).Handle)
+
 	ginEngine.Any("/api/v1/clients/:clientId", handlers.NewClientsApiHandler(
 		dependencies.AccountRepository,
 		dependencies.GoogleClientRepository,

@@ -47,7 +47,7 @@ func (r repository) Find(key string) ([]byte, error) {
 }
 
 func (r repository) FindAll() (map[string][]byte, error) {
-	var values map[string][]byte
+	values := make(map[string][]byte)
 
 	err := r.DB.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(clientBucketName))
@@ -84,7 +84,7 @@ func (r repository) FindAssignedAccounts(clientId string) ([]byte, error) {
 }
 
 func (r repository) FindAllAssignedAccounts() (map[string][]byte, error) {
-	var values map[string][]byte
+	values := make(map[string][]byte)
 
 	err := r.DB.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(assignedAccountsBucketName))

@@ -20,8 +20,13 @@ type clientsApiHandler struct {
 }
 
 type updateClientRequest struct {
-	ID     string `json:"id" binding:"required,alphanum"`
-	Secret string `json:"secret" binding:"required,alphanum"`
+	ID     string `json:"id" binding:"required"`
+	Secret string `json:"secret" binding:"required"`
+}
+
+type clientDataResponse struct {
+	google_client.ClientData
+	AssignedAccounts []account.AccountData `json:"assignedAccounts"`
 }
 
 func NewClientsApiHandler(
@@ -67,10 +72,10 @@ func (h *clientsApiHandler) handleGet(c *gin.Context) {
 			return
 		}
 
-		clientsData := make([]google_client.ClientData, 0, len(clients))
+		clientsDataResponse := make([]clientDataResponse, 0, len(clients))
 
 		for _, client := range clients {
-			clientData, err := h.getClientData(client)
+			clientDataResponse, err := h.getClientData(client)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 				log.Error(fmt.Errorf("google clients: handle get all: get client data: %w", err))
@@ -78,10 +83,10 @@ func (h *clientsApiHandler) handleGet(c *gin.Context) {
 				return
 			}
 
-			clientsData = append(clientsData, clientData)
+			clientsDataResponse = append(clientsDataResponse, clientDataResponse)
 		}
 
-		c.JSON(http.StatusOK, gin.H{"data": clientsData})
+		c.JSON(http.StatusOK, gin.H{"data": clientsDataResponse})
 
 		return
 	}
@@ -100,7 +105,7 @@ func (h *clientsApiHandler) handleGet(c *gin.Context) {
 		return
 	}
 
-	clientData, err := h.getClientData(client)
+	clientDataResponse, err := h.getClientData(client)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		log.Error(fmt.Errorf("google clients: handle get: get client data: %w", err))
@@ -108,7 +113,7 @@ func (h *clientsApiHandler) handleGet(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": clientData})
+	c.JSON(http.StatusOK, gin.H{"data": clientDataResponse})
 }
 
 func (h *clientsApiHandler) handlePost(c *gin.Context) {
@@ -193,33 +198,35 @@ func (h *clientsApiHandler) generateRedirectUrl(clientID string) (string, error)
 	return fmt.Sprintf("%s/auth/google/callback/%s", settingsData.Host, clientID), nil
 }
 
-func (h *clientsApiHandler) getClientData(client []byte) (google_client.ClientData, error) {
+func (h *clientsApiHandler) getClientData(client []byte) (clientDataResponse, error) {
 	var clientData google_client.ClientData
 
 	err := json.Unmarshal(client, &clientData)
 	if err != nil {
-		return google_client.ClientData{}, fmt.Errorf("unmarshal client data: %w", err)
+		return clientDataResponse{}, fmt.Errorf("unmarshal client data: %w", err)
 	}
+
+	clientDataResponse := clientDataResponse{clientData, make([]account.AccountData, 0)}
 
 	assignedAccountsJson, err := h.googleClientRepository.FindAssignedAccounts(clientData.ID)
 	if err != nil {
-		return google_client.ClientData{}, fmt.Errorf("find assigned accounts: %w", err)
+		return clientDataResponse, fmt.Errorf("find assigned accounts: %w", err)
 	}
 
 	if assignedAccountsJson == nil {
-		return clientData, nil
+		return clientDataResponse, nil
 	}
 
 	var assignedAccountEmails []string
 	err = json.Unmarshal(assignedAccountsJson, &assignedAccountEmails)
 	if err != nil {
-		return google_client.ClientData{}, fmt.Errorf("unmarshal assigned accounts: %w", err)
+		return clientDataResponse, fmt.Errorf("unmarshal assigned accounts: %w", err)
 	}
 
 	for _, email := range assignedAccountEmails {
 		accountJson, err := h.accountRepository.FindAccount(email)
 		if err != nil {
-			return google_client.ClientData{}, fmt.Errorf("find account: %w", err)
+			return clientDataResponse, fmt.Errorf("find account: %w", err)
 		}
 
 		if accountJson == nil {
@@ -229,11 +236,11 @@ func (h *clientsApiHandler) getClientData(client []byte) (google_client.ClientDa
 		var accountData account.AccountData
 		err = json.Unmarshal(accountJson, &accountData)
 		if err != nil {
-			return google_client.ClientData{}, fmt.Errorf("unmarshal account data: %w", err)
+			return clientDataResponse, fmt.Errorf("unmarshal account data: %w", err)
 		}
 
-		clientData.AssignedAccounts = append(clientData.AssignedAccounts, accountData)
+		clientDataResponse.AssignedAccounts = append(clientDataResponse.AssignedAccounts, accountData)
 	}
 
-	return clientData, nil
+	return clientDataResponse, nil
 }

@@ -23,10 +23,10 @@ type response struct {
 		Secret           string `json:"secret"`
 		RedirectURL      string `json:"redirectUrl"`
 		AssignedAccounts []struct {
-			Email     string `json:"email"`
-			FirstName string `json:"firstName"`
-			LastName  string `json:"lastName"`
-			Picture   string `json:"picture"`
+			Email      string `json:"email"`
+			GivenName  string `json:"givenName"`
+			FamilyName string `json:"familyName"`
+			Picture    string `json:"picture"`
 		} `json:"assignedAccounts"`
 	} `json:"data"`
 }
@@ -52,7 +52,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, `{"data":[{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1","assignedAccounts":null},{"id":"id2","secret":"secret2","redirectUrl":"http://localhost:8080/redirect_url/id2","assignedAccounts":null}]}`, w.Body.String())
+		assert.Equal(t, `{"data":[{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1","assignedAccounts":[]},{"id":"id2","secret":"secret2","redirectUrl":"http://localhost:8080/redirect_url/id2","assignedAccounts":[]}]}`, w.Body.String())
 	})
 
 	t.Run("get list of clients with assigned accounts", func(t *testing.T) {
@@ -68,7 +68,7 @@ func TestClientsHandle(t *testing.T) {
 
 		fakeGoogleClientRepository.FindAssignedAccountsReturns([]byte(`["email1@test.com","email2@test.com"]`), nil)
 
-		fakeAccountRepository.FindAccountReturns([]byte(`{"email":"email","picture":"picture","firstName":"Bob","lastName":"Alice"}`), nil)
+		fakeAccountRepository.FindAccountReturns([]byte(`{"email":"email","picture":"picture","givenName":"Bob","familyName":"Alice"}`), nil)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -80,7 +80,7 @@ func TestClientsHandle(t *testing.T) {
 		_ = json.Unmarshal(w.Body.Bytes(), &actualData)
 
 		var expectedData response
-		_ = json.Unmarshal([]byte(`{"data":[{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1","assignedAccounts":[{"email":"email","firstName":"Bob","lastName":"Alice","picture":"picture"},{"email":"email","firstName":"Bob","lastName":"Alice","picture":"picture"}]},{"id":"id2","secret":"secret2","redirectUrl":"http://localhost:8080/redirect_url/id2","assignedAccounts":[{"email":"email","firstName":"Bob","lastName":"Alice","picture":"picture"},{"email":"email","firstName":"Bob","lastName":"Alice","picture":"picture"}]}]}`), &expectedData)
+		_ = json.Unmarshal([]byte(`{"data":[{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1","assignedAccounts":[{"email":"email","givenName":"Bob","familyName":"Alice","picture":"picture"},{"email":"email","givenName":"Bob","familyName":"Alice","picture":"picture"}]},{"id":"id2","secret":"secret2","redirectUrl":"http://localhost:8080/redirect_url/id2","assignedAccounts":[{"email":"email","givenName":"Bob","familyName":"Alice","picture":"picture"},{"email":"email","givenName":"Bob","familyName":"Alice","picture":"picture"}]}]}`), &expectedData)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.ElementsMatch(t, expectedData.Data, actualData.Data)
@@ -99,7 +99,7 @@ func TestClientsHandle(t *testing.T) {
 
 		fakeGoogleClientRepository.FindAssignedAccountsReturns([]byte(`["email1@test.com","email2@test.com"]`), nil)
 
-		fakeAccountRepository.FindAccountReturns([]byte(`{"email":"email","picture":"picture","firstName":"Bob","lastName":"Alice"}`), nil)
+		fakeAccountRepository.FindAccountReturns([]byte(`{"email":"email","picture":"picture","givenName":"Bob","familyName":"Alice"}`), nil)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -114,7 +114,7 @@ func TestClientsHandle(t *testing.T) {
 		handler.Handle(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, `{"data":{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1","assignedAccounts":[{"email":"email","firstName":"Bob","lastName":"Alice","picture":"picture"},{"email":"email","firstName":"Bob","lastName":"Alice","picture":"picture"}]}}`, w.Body.String())
+		assert.Equal(t, `{"data":{"id":"id1","secret":"secret1","redirectUrl":"http://localhost:8080/redirect_url/id1","assignedAccounts":[{"email":"email","givenName":"Bob","familyName":"Alice","picture":"picture"},{"email":"email","givenName":"Bob","familyName":"Alice","picture":"picture"}]}}`, w.Body.String())
 	})
 
 	t.Run("list of clients not found", func(t *testing.T) {
@@ -222,10 +222,10 @@ func TestClientsHandle(t *testing.T) {
 		clientId, clientData := fakeGoogleClientRepository.SaveArgsForCall(0)
 
 		assert.Equal(t, http.StatusCreated, w.Code)
-		assert.Equal(t, `{"data":{"id":"id1","secret":"secret1","redirectUrl":"http://domain/auth/google/callback/id1","assignedAccounts":null}}`, w.Body.String())
+		assert.Equal(t, `{"data":{"id":"id1","secret":"secret1","redirectUrl":"http://domain/auth/google/callback/id1"}}`, w.Body.String())
 		assert.Equal(t, 1, fakeGoogleClientRepository.SaveCallCount())
 		assert.Equal(t, "id1", clientId)
-		assert.Equal(t, `{"id":"id1","secret":"secret1","redirectUrl":"http://domain/auth/google/callback/id1","assignedAccounts":null}`, string(clientData))
+		assert.Equal(t, `{"id":"id1","secret":"secret1","redirectUrl":"http://domain/auth/google/callback/id1"}`, string(clientData))
 	})
 
 	t.Run("create a client validation", func(t *testing.T) {
