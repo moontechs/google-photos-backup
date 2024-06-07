@@ -1,0 +1,7 @@
+#V2
+DEFINE USER backend ON ROOT PASSWORD "change123" ROLES OWNER;
+INSERT INTO users (email, password) VALUES (sdfs, crypto::argon2::generate(change123));
+INSERT INTO users (email, password) VALUES (sdfs, crypto::argon2::generate("change123"));
+DEFINE USER backend ON ROOT PASSWORD "change123" ROLES OWNER;
+INSERT INTO users (email, password) VALUES (sdfs, crypto::argon2::generate("change123"));
+INSERT INTO users (email, password) VALUES ("sdfdsf@gsdg.com", crypto::argon2::generate("change123"));

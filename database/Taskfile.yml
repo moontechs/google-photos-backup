@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+  install:
+    requires:
+      vars: [DB_URL, SURREAL_USER, SURREAL_PASS, BACKEND_USER, BACKEND_USER_PASSWORD]
+    cmds:
+      - echo "DEFINE USER $BACKEND_USER ON ROOT PASSWORD \"$BACKEND_USER_PASSWORD\" ROLES OWNER;" | /surreal sql --endpoint $DB_URL --namespace backup --database backup
+      - /surreal import --endpoint $DB_URL --namespace backup --database backup /data/queries/install.surql
+
+  create-user:
+    requires:
+      vars: [DB_URL, SURREAL_USER, SURREAL_PASS, email, password]
+    cmds:
+      - echo "INSERT INTO users (email, password) VALUES (\"{{.email}}\", crypto::argon2::generate(\"{{.password}}\"));" | /surreal sql --endpoint $DB_URL --namespace backup --database backup

@@ -1,24 +1,33 @@
-# fr
+# google-backup
 
-## Project setup
-```
-yarn install
-```
+This template should help get you started developing with Vue 3 in Vite.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+## Recommended IDE Setup
 
-### Compiles and minifies for production
-```
-yarn build
-```
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
 
-### Lints and fixes files
-```
-yarn lint
+## Customize configuration
+
+See [Vite Configuration Reference](https://vitejs.dev/config/).
+
+## Project Setup
+
+```sh
+docker build -t pnpnm:latest .
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```sh
+docker run -it --rm -v $(pwd):/app -w /app pnpnm:latest pnpm install
+```
+
+### Compile and Hot-Reload for Development
+
+```sh
+docker run -it --rm -v $(pwd):/app -w /app -p 8080:8080 pnpnm:latest pnpm dev --port 8080 --host
+```
+
+### Compile and Minify for Production
+
+```sh
+docker run -it --rm -v $(pwd):/app -w /app pnpnm:latest pnpm build
+```

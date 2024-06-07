@@ -1,0 +1,56 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - 8080:8080
+    volumes:
+      - ./frontend:/app
+    command:
+      - pnpm
+      - dev 
+      - --port=8080 
+      - --host
+    restart: always
+    
+  surrealdb:
+    image: surrealdb/surrealdb:v1.5.2
+    container_name: surrealdb
+    ports:
+      - 8000:8000
+    volumes:
+      - ./dev-data:/data
+    env_file:
+      - .env.local
+    command:
+      - start
+      - --auth
+      - file:/data/database.db
+    restart: always
+
+  # database-setup:
+  #   image: database-setup:latest
+  #   build: ./database
+  #   volumes:
+  #     - ./database:/app
+  #   command: sh /app/setup.sh
+  #   env_file:
+  #     - .env.local
+  #   depends_on:
+  #     - surrealdb
+
+  # database-setup:
+  #   image: surrealdb/surrealdb:latest
+  #   volumes:
+  #     - ./database:/app
+  #   env_file:
+  #     - ./.env.local
+  #   environment:
+  #     - DB_URL=sdfdsf
+  #   command:
+  #     - import
+  #     - --endpoint=$DB_URL
+  #     - --user=$USER
+  #     - --pass=$PASSWORD
+  #     - /app/install.surql
+  #   depends_on:
+  #     - surrealdb
