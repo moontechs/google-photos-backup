@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	accountLimitsKey   = "limits"
 	oauthClientNameKey = "oauth_client_name"
 	tokensBucketName   = "tokens"
 	accountsBucketName = "accounts"
@@ -19,12 +18,10 @@ const (
 type Repository interface {
 	SaveToken(email string, token []byte) error
 	SaveAccount(email string, userInfo []byte) error
-	GetAccounts() ([][]byte, error)
+	FindAccounts() ([][]byte, error)
 	FindAccount(email string) ([]byte, error)
 	AccountExist(email string) (bool, error)
 	FindTokenByEmail(email string) ([]byte, error)
-	CreateUpdateLimits(email string, limits []byte) error
-	GetLimits(email string) ([]byte, error)
 	GetAccountOauthClientName(email string) ([]byte, error)
 }
 
@@ -71,6 +68,8 @@ func (r *repo) SaveAccountOauthClientName(email string, clientName []byte) error
 
 func (r *repo) AccountExist(email string) (bool, error) {
 	var exist bool
+	exist = false
+
 	err := r.DB.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket([]byte(accountsBucketName))
 		if bucket == nil {
@@ -158,7 +157,7 @@ func (r *repo) GetLimitReached(email string) (bool, error) {
 	return limitReached, err
 }
 
-func (r *repo) GetAccounts() ([][]byte, error) {
+func (r *repo) FindAccounts() ([][]byte, error) {
 	var accounts [][]byte
 
 	err := r.DB.View(func(tx *bbolt.Tx) error {
@@ -177,34 +176,6 @@ func (r *repo) GetAccounts() ([][]byte, error) {
 	})
 
 	return accounts, err
-}
-
-func (r *repo) GetLimits(email string) ([]byte, error) {
-	var limits []byte
-
-	r.DB.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket([]byte(email))
-		if bucket == nil {
-			return nil
-		}
-
-		limits = bucket.Get([]byte(accountLimitsKey))
-
-		return nil
-	})
-
-	return limits, nil
-}
-
-func (r *repo) CreateUpdateLimits(email string, limits []byte) error {
-	return r.DB.Update(func(tx *bbolt.Tx) error {
-		bucket, err := tx.CreateBucketIfNotExists([]byte(email))
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
-		}
-
-		return bucket.Put([]byte(accountLimitsKey), limits)
-	})
 }
 
 func (r *repo) GetAccountOauthClientName(email string) ([]byte, error) {

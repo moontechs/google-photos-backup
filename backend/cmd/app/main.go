@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"google-backup/internal/cron"
 	"google-backup/internal/dependencies"
-	"google-backup/internal/downloader"
 	"google-backup/internal/handlers"
 	"google-backup/internal/scanner"
 
@@ -33,17 +33,17 @@ func main() {
 		log.Fatal(fmt.Errorf("init config: %w", err))
 	}
 
-	// cronRunner, err := createCron(dependencies)
+	cronRunner, err := createCron(dependencies)
 	if err != nil {
 		log.Fatal(fmt.Errorf("create cron runner: %w", err))
 	}
 
 	ginServer := createGinServer(dependencies)
 
-	// ctx, cancel := context.WithCancel(context.Background())
-	// defer cancel()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	// go cronRunner.Start(ctx)
+	go cronRunner.Start(ctx)
 
 	err = ginServer.Run("0.0.0.0:8080")
 	if err != nil {
@@ -89,13 +89,13 @@ func createCron(dependencies dependencies.Dependencies) (cron.Runner, error) {
 	return cron.NewCron(
 		[]cron.Job{
 			scanner.NewScannerJob(
-				dependencies.UpdatesScanner,
+				dependencies.PhotosUpdatesScanner,
 				dependencies.SettingsRepository,
 			),
-			downloader.NewDownloaderJob(
-				dependencies.Downloader,
-				dependencies.SettingsRepository,
-			),
+			// downloader.NewDownloaderJob(
+			// 	dependencies.Downloader,
+			// 	dependencies.SettingsRepository,
+			// ),
 		},
 	), nil
 }

@@ -26,7 +26,7 @@ func main() {
 	defer dependencies.DbConnection.Close()
 
 	scannerJob := scanner.NewScannerJob(
-		dependencies.UpdatesScanner,
+		dependencies.PhotosUpdatesScanner,
 		dependencies.SettingsRepository,
 	)
 

@@ -3,13 +3,13 @@ package account
 import (
 	"encoding/json"
 	"fmt"
+	"google-backup/internal/google_client"
 
 	"golang.org/x/oauth2"
 )
 
 type Account interface {
-	GetAccounts() ([][]byte, error)
-	GetAccountOauthClientName(email string) (string, error)
+	GetAccountOauthClientId(email string) (string, error)
 	GetTokenByEmail(email string) (oauth2.Token, error)
 }
 
@@ -21,28 +21,36 @@ type AccountData struct {
 }
 
 type account struct {
-	repository Repository
+	repository             Repository
+	googleClientRepository google_client.Repository
 }
 
-func NewAccount(repository Repository) account {
-	return account{repository: repository}
+func NewAccount(repository Repository, googleClientRepository google_client.Repository) account {
+	return account{repository: repository, googleClientRepository: googleClientRepository}
 }
 
-func (a account) GetAccounts() ([][]byte, error) {
-	return a.repository.GetAccounts()
-}
-
-func (a account) GetAccountOauthClientName(email string) (string, error) {
-	clientName, err := a.repository.GetAccountOauthClientName(email)
+func (a account) GetAccountOauthClientId(email string) (string, error) {
+	assignedAccountsMap, err := a.googleClientRepository.FindAllAssignedAccounts()
 	if err != nil {
-		return "", fmt.Errorf("get account oauth client name: %w", err)
+		return "", fmt.Errorf("find all assigned accounts: %w", err)
 	}
 
-	if clientName == nil {
-		return "", fmt.Errorf("account oauth client name is not assigned")
+	for clientId, assignedAccountsJson := range assignedAccountsMap {
+		var assignedAccounts []string
+
+		err = json.Unmarshal(assignedAccountsJson, &assignedAccounts)
+		if err != nil {
+			return "", fmt.Errorf("unmarshal assigned accounts: %w", err)
+		}
+
+		for _, assignedAccount := range assignedAccounts {
+			if assignedAccount == email {
+				return clientId, nil
+			}
+		}
 	}
 
-	return string(clientName), nil
+	return "", fmt.Errorf("account oauth client id is not assigned")
 }
 
 func (a account) GetTokenByEmail(email string) (oauth2.Token, error) {

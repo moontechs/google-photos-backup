@@ -1,4 +1,4 @@
-package media
+package photos
 
 type mediaItemsListResponseBody struct {
 	MediaItems    []MediaItem `json:"mediaItems"`

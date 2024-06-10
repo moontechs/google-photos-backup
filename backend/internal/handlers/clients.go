@@ -183,7 +183,7 @@ func (h *clientsApiHandler) handleDelete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *clientsApiHandler) generateRedirectUrl(clientID string) (string, error) {
+func (h *clientsApiHandler) generateRedirectUrl(clientId string) (string, error) {
 	settingsJson, err := h.settingsRepository.Find()
 	if err != nil {
 		return "", fmt.Errorf("find settings: %w", err)
@@ -195,7 +195,7 @@ func (h *clientsApiHandler) generateRedirectUrl(clientID string) (string, error)
 		return "", fmt.Errorf("marshal settings: %w", err)
 	}
 
-	return fmt.Sprintf("%s/auth/google/callback/%s", settingsData.Host, clientID), nil
+	return fmt.Sprintf("%s/auth/google/callback/%s", settingsData.Host, clientId), nil
 }
 
 func (h *clientsApiHandler) getClientData(client []byte) (clientDataResponse, error) {

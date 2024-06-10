@@ -1,12 +1,15 @@
 package google_client
 
 import (
+	"fmt"
+
 	"go.etcd.io/bbolt"
 )
 
 const (
 	clientBucketName           = "clients"
 	assignedAccountsBucketName = "assigned_accounts"
+	clientLimitsBucketName     = "limits"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Repository
@@ -18,6 +21,8 @@ type Repository interface {
 	Save(key string, value []byte) error
 	SaveAssignedAccounts(clientId string, value []byte) error
 	Delete(key string) error
+	CreateUpdateLimits(email string, limits []byte) error
+	GetLimits(clientId string) ([]byte, error)
 }
 
 type repository struct {
@@ -132,5 +137,34 @@ func (r repository) Delete(key string) error {
 		}
 
 		return bucket.Delete([]byte(key))
+	})
+}
+
+func (r repository) GetLimits(clientId string) ([]byte, error) {
+	var limits []byte
+	limits = nil
+
+	r.DB.View(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket([]byte(clientLimitsBucketName))
+		if bucket == nil {
+			return nil
+		}
+
+		limits = bucket.Get([]byte(clientId))
+
+		return nil
+	})
+
+	return limits, nil
+}
+
+func (r repository) CreateUpdateLimits(clientId string, limits []byte) error {
+	return r.DB.Update(func(tx *bbolt.Tx) error {
+		bucket, err := tx.CreateBucketIfNotExists([]byte(clientLimitsBucketName))
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+
+		return bucket.Put([]byte(clientId), limits)
 	})
 }

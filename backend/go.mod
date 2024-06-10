@@ -14,7 +14,10 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/maxbrunsfeld/counterfeiter/v6 v6.8.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	golang.org/x/mod v0.14.0 // indirect
+	golang.org/x/tools v0.17.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 

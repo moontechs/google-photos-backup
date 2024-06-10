@@ -1,4 +1,4 @@
-package media
+package photos
 
 import (
 	"encoding/json"
@@ -10,6 +10,7 @@ import (
 type Reader interface {
 	GetMediaItems(email string, nextPageToken string) (MediaItems, error)
 	GetMediaItem(mediaItemId string) (MediaItem, error)
+	GetClientId() string
 }
 
 type TooManyRequestsError struct {
@@ -21,11 +22,13 @@ type NotOkRequestError struct {
 }
 
 type reader struct {
+	ClientId   string
 	httpClient *http.Client
 }
 
-func NewReader(httpClient *http.Client) (*reader, error) {
+func NewReader(clientId string, httpClient *http.Client) (*reader, error) {
 	return &reader{
+		ClientId:   clientId,
 		httpClient: httpClient,
 	}, nil
 }
@@ -95,6 +98,10 @@ func (m *reader) GetMediaItem(mediaItemId string) (MediaItem, error) {
 	}
 
 	return mediaItem, nil
+}
+
+func (m *reader) GetClientId() string {
+	return m.ClientId
 }
 
 // func (m *reader) getFilters(startDate, endDate time.Time) filters {

@@ -7,6 +7,18 @@ import (
 )
 
 type FakeRepository struct {
+	CreateUpdateLimitsStub        func(string, []byte) error
+	createUpdateLimitsMutex       sync.RWMutex
+	createUpdateLimitsArgsForCall []struct {
+		arg1 string
+		arg2 []byte
+	}
+	createUpdateLimitsReturns struct {
+		result1 error
+	}
+	createUpdateLimitsReturnsOnCall map[int]struct {
+		result1 error
+	}
 	DeleteStub        func(string) error
 	deleteMutex       sync.RWMutex
 	deleteArgsForCall []struct {
@@ -68,6 +80,19 @@ type FakeRepository struct {
 		result1 []byte
 		result2 error
 	}
+	GetLimitsStub        func(string) ([]byte, error)
+	getLimitsMutex       sync.RWMutex
+	getLimitsArgsForCall []struct {
+		arg1 string
+	}
+	getLimitsReturns struct {
+		result1 []byte
+		result2 error
+	}
+	getLimitsReturnsOnCall map[int]struct {
+		result1 []byte
+		result2 error
+	}
 	SaveStub        func(string, []byte) error
 	saveMutex       sync.RWMutex
 	saveArgsForCall []struct {
@@ -94,6 +119,73 @@ type FakeRepository struct {
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
+}
+
+func (fake *FakeRepository) CreateUpdateLimits(arg1 string, arg2 []byte) error {
+	var arg2Copy []byte
+	if arg2 != nil {
+		arg2Copy = make([]byte, len(arg2))
+		copy(arg2Copy, arg2)
+	}
+	fake.createUpdateLimitsMutex.Lock()
+	ret, specificReturn := fake.createUpdateLimitsReturnsOnCall[len(fake.createUpdateLimitsArgsForCall)]
+	fake.createUpdateLimitsArgsForCall = append(fake.createUpdateLimitsArgsForCall, struct {
+		arg1 string
+		arg2 []byte
+	}{arg1, arg2Copy})
+	stub := fake.CreateUpdateLimitsStub
+	fakeReturns := fake.createUpdateLimitsReturns
+	fake.recordInvocation("CreateUpdateLimits", []interface{}{arg1, arg2Copy})
+	fake.createUpdateLimitsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1, arg2)
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fakeReturns.result1
+}
+
+func (fake *FakeRepository) CreateUpdateLimitsCallCount() int {
+	fake.createUpdateLimitsMutex.RLock()
+	defer fake.createUpdateLimitsMutex.RUnlock()
+	return len(fake.createUpdateLimitsArgsForCall)
+}
+
+func (fake *FakeRepository) CreateUpdateLimitsCalls(stub func(string, []byte) error) {
+	fake.createUpdateLimitsMutex.Lock()
+	defer fake.createUpdateLimitsMutex.Unlock()
+	fake.CreateUpdateLimitsStub = stub
+}
+
+func (fake *FakeRepository) CreateUpdateLimitsArgsForCall(i int) (string, []byte) {
+	fake.createUpdateLimitsMutex.RLock()
+	defer fake.createUpdateLimitsMutex.RUnlock()
+	argsForCall := fake.createUpdateLimitsArgsForCall[i]
+	return argsForCall.arg1, argsForCall.arg2
+}
+
+func (fake *FakeRepository) CreateUpdateLimitsReturns(result1 error) {
+	fake.createUpdateLimitsMutex.Lock()
+	defer fake.createUpdateLimitsMutex.Unlock()
+	fake.CreateUpdateLimitsStub = nil
+	fake.createUpdateLimitsReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeRepository) CreateUpdateLimitsReturnsOnCall(i int, result1 error) {
+	fake.createUpdateLimitsMutex.Lock()
+	defer fake.createUpdateLimitsMutex.Unlock()
+	fake.CreateUpdateLimitsStub = nil
+	if fake.createUpdateLimitsReturnsOnCall == nil {
+		fake.createUpdateLimitsReturnsOnCall = make(map[int]struct {
+			result1 error
+		})
+	}
+	fake.createUpdateLimitsReturnsOnCall[i] = struct {
+		result1 error
+	}{result1}
 }
 
 func (fake *FakeRepository) Delete(arg1 string) error {
@@ -397,6 +489,70 @@ func (fake *FakeRepository) FindAssignedAccountsReturnsOnCall(i int, result1 []b
 	}{result1, result2}
 }
 
+func (fake *FakeRepository) GetLimits(arg1 string) ([]byte, error) {
+	fake.getLimitsMutex.Lock()
+	ret, specificReturn := fake.getLimitsReturnsOnCall[len(fake.getLimitsArgsForCall)]
+	fake.getLimitsArgsForCall = append(fake.getLimitsArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	stub := fake.GetLimitsStub
+	fakeReturns := fake.getLimitsReturns
+	fake.recordInvocation("GetLimits", []interface{}{arg1})
+	fake.getLimitsMutex.Unlock()
+	if stub != nil {
+		return stub(arg1)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRepository) GetLimitsCallCount() int {
+	fake.getLimitsMutex.RLock()
+	defer fake.getLimitsMutex.RUnlock()
+	return len(fake.getLimitsArgsForCall)
+}
+
+func (fake *FakeRepository) GetLimitsCalls(stub func(string) ([]byte, error)) {
+	fake.getLimitsMutex.Lock()
+	defer fake.getLimitsMutex.Unlock()
+	fake.GetLimitsStub = stub
+}
+
+func (fake *FakeRepository) GetLimitsArgsForCall(i int) string {
+	fake.getLimitsMutex.RLock()
+	defer fake.getLimitsMutex.RUnlock()
+	argsForCall := fake.getLimitsArgsForCall[i]
+	return argsForCall.arg1
+}
+
+func (fake *FakeRepository) GetLimitsReturns(result1 []byte, result2 error) {
+	fake.getLimitsMutex.Lock()
+	defer fake.getLimitsMutex.Unlock()
+	fake.GetLimitsStub = nil
+	fake.getLimitsReturns = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) GetLimitsReturnsOnCall(i int, result1 []byte, result2 error) {
+	fake.getLimitsMutex.Lock()
+	defer fake.getLimitsMutex.Unlock()
+	fake.GetLimitsStub = nil
+	if fake.getLimitsReturnsOnCall == nil {
+		fake.getLimitsReturnsOnCall = make(map[int]struct {
+			result1 []byte
+			result2 error
+		})
+	}
+	fake.getLimitsReturnsOnCall[i] = struct {
+		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
 func (fake *FakeRepository) Save(arg1 string, arg2 []byte) error {
 	var arg2Copy []byte
 	if arg2 != nil {
@@ -534,6 +690,8 @@ func (fake *FakeRepository) SaveAssignedAccountsReturnsOnCall(i int, result1 err
 func (fake *FakeRepository) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
+	fake.createUpdateLimitsMutex.RLock()
+	defer fake.createUpdateLimitsMutex.RUnlock()
 	fake.deleteMutex.RLock()
 	defer fake.deleteMutex.RUnlock()
 	fake.findMutex.RLock()
@@ -544,6 +702,8 @@ func (fake *FakeRepository) Invocations() map[string][][]interface{} {
 	defer fake.findAllAssignedAccountsMutex.RUnlock()
 	fake.findAssignedAccountsMutex.RLock()
 	defer fake.findAssignedAccountsMutex.RUnlock()
+	fake.getLimitsMutex.RLock()
+	defer fake.getLimitsMutex.RUnlock()
 	fake.saveMutex.RLock()
 	defer fake.saveMutex.RUnlock()
 	fake.saveAssignedAccountsMutex.RLock()

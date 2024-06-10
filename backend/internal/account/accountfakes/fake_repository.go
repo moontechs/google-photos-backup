@@ -20,18 +20,6 @@ type FakeRepository struct {
 		result1 bool
 		result2 error
 	}
-	CreateUpdateLimitsStub        func(string, []byte) error
-	createUpdateLimitsMutex       sync.RWMutex
-	createUpdateLimitsArgsForCall []struct {
-		arg1 string
-		arg2 []byte
-	}
-	createUpdateLimitsReturns struct {
-		result1 error
-	}
-	createUpdateLimitsReturnsOnCall map[int]struct {
-		result1 error
-	}
 	FindAccountStub        func(string) ([]byte, error)
 	findAccountMutex       sync.RWMutex
 	findAccountArgsForCall []struct {
@@ -43,6 +31,18 @@ type FakeRepository struct {
 	}
 	findAccountReturnsOnCall map[int]struct {
 		result1 []byte
+		result2 error
+	}
+	FindAccountsStub        func() ([][]byte, error)
+	findAccountsMutex       sync.RWMutex
+	findAccountsArgsForCall []struct {
+	}
+	findAccountsReturns struct {
+		result1 [][]byte
+		result2 error
+	}
+	findAccountsReturnsOnCall map[int]struct {
+		result1 [][]byte
 		result2 error
 	}
 	FindTokenByEmailStub        func(string) ([]byte, error)
@@ -68,31 +68,6 @@ type FakeRepository struct {
 		result2 error
 	}
 	getAccountOauthClientNameReturnsOnCall map[int]struct {
-		result1 []byte
-		result2 error
-	}
-	GetAccountsStub        func() ([][]byte, error)
-	getAccountsMutex       sync.RWMutex
-	getAccountsArgsForCall []struct {
-	}
-	getAccountsReturns struct {
-		result1 [][]byte
-		result2 error
-	}
-	getAccountsReturnsOnCall map[int]struct {
-		result1 [][]byte
-		result2 error
-	}
-	GetLimitsStub        func(string) ([]byte, error)
-	getLimitsMutex       sync.RWMutex
-	getLimitsArgsForCall []struct {
-		arg1 string
-	}
-	getLimitsReturns struct {
-		result1 []byte
-		result2 error
-	}
-	getLimitsReturnsOnCall map[int]struct {
 		result1 []byte
 		result2 error
 	}
@@ -188,73 +163,6 @@ func (fake *FakeRepository) AccountExistReturnsOnCall(i int, result1 bool, resul
 	}{result1, result2}
 }
 
-func (fake *FakeRepository) CreateUpdateLimits(arg1 string, arg2 []byte) error {
-	var arg2Copy []byte
-	if arg2 != nil {
-		arg2Copy = make([]byte, len(arg2))
-		copy(arg2Copy, arg2)
-	}
-	fake.createUpdateLimitsMutex.Lock()
-	ret, specificReturn := fake.createUpdateLimitsReturnsOnCall[len(fake.createUpdateLimitsArgsForCall)]
-	fake.createUpdateLimitsArgsForCall = append(fake.createUpdateLimitsArgsForCall, struct {
-		arg1 string
-		arg2 []byte
-	}{arg1, arg2Copy})
-	stub := fake.CreateUpdateLimitsStub
-	fakeReturns := fake.createUpdateLimitsReturns
-	fake.recordInvocation("CreateUpdateLimits", []interface{}{arg1, arg2Copy})
-	fake.createUpdateLimitsMutex.Unlock()
-	if stub != nil {
-		return stub(arg1, arg2)
-	}
-	if specificReturn {
-		return ret.result1
-	}
-	return fakeReturns.result1
-}
-
-func (fake *FakeRepository) CreateUpdateLimitsCallCount() int {
-	fake.createUpdateLimitsMutex.RLock()
-	defer fake.createUpdateLimitsMutex.RUnlock()
-	return len(fake.createUpdateLimitsArgsForCall)
-}
-
-func (fake *FakeRepository) CreateUpdateLimitsCalls(stub func(string, []byte) error) {
-	fake.createUpdateLimitsMutex.Lock()
-	defer fake.createUpdateLimitsMutex.Unlock()
-	fake.CreateUpdateLimitsStub = stub
-}
-
-func (fake *FakeRepository) CreateUpdateLimitsArgsForCall(i int) (string, []byte) {
-	fake.createUpdateLimitsMutex.RLock()
-	defer fake.createUpdateLimitsMutex.RUnlock()
-	argsForCall := fake.createUpdateLimitsArgsForCall[i]
-	return argsForCall.arg1, argsForCall.arg2
-}
-
-func (fake *FakeRepository) CreateUpdateLimitsReturns(result1 error) {
-	fake.createUpdateLimitsMutex.Lock()
-	defer fake.createUpdateLimitsMutex.Unlock()
-	fake.CreateUpdateLimitsStub = nil
-	fake.createUpdateLimitsReturns = struct {
-		result1 error
-	}{result1}
-}
-
-func (fake *FakeRepository) CreateUpdateLimitsReturnsOnCall(i int, result1 error) {
-	fake.createUpdateLimitsMutex.Lock()
-	defer fake.createUpdateLimitsMutex.Unlock()
-	fake.CreateUpdateLimitsStub = nil
-	if fake.createUpdateLimitsReturnsOnCall == nil {
-		fake.createUpdateLimitsReturnsOnCall = make(map[int]struct {
-			result1 error
-		})
-	}
-	fake.createUpdateLimitsReturnsOnCall[i] = struct {
-		result1 error
-	}{result1}
-}
-
 func (fake *FakeRepository) FindAccount(arg1 string) ([]byte, error) {
 	fake.findAccountMutex.Lock()
 	ret, specificReturn := fake.findAccountReturnsOnCall[len(fake.findAccountArgsForCall)]
@@ -315,6 +223,62 @@ func (fake *FakeRepository) FindAccountReturnsOnCall(i int, result1 []byte, resu
 	}
 	fake.findAccountReturnsOnCall[i] = struct {
 		result1 []byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) FindAccounts() ([][]byte, error) {
+	fake.findAccountsMutex.Lock()
+	ret, specificReturn := fake.findAccountsReturnsOnCall[len(fake.findAccountsArgsForCall)]
+	fake.findAccountsArgsForCall = append(fake.findAccountsArgsForCall, struct {
+	}{})
+	stub := fake.FindAccountsStub
+	fakeReturns := fake.findAccountsReturns
+	fake.recordInvocation("FindAccounts", []interface{}{})
+	fake.findAccountsMutex.Unlock()
+	if stub != nil {
+		return stub()
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fakeReturns.result1, fakeReturns.result2
+}
+
+func (fake *FakeRepository) FindAccountsCallCount() int {
+	fake.findAccountsMutex.RLock()
+	defer fake.findAccountsMutex.RUnlock()
+	return len(fake.findAccountsArgsForCall)
+}
+
+func (fake *FakeRepository) FindAccountsCalls(stub func() ([][]byte, error)) {
+	fake.findAccountsMutex.Lock()
+	defer fake.findAccountsMutex.Unlock()
+	fake.FindAccountsStub = stub
+}
+
+func (fake *FakeRepository) FindAccountsReturns(result1 [][]byte, result2 error) {
+	fake.findAccountsMutex.Lock()
+	defer fake.findAccountsMutex.Unlock()
+	fake.FindAccountsStub = nil
+	fake.findAccountsReturns = struct {
+		result1 [][]byte
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeRepository) FindAccountsReturnsOnCall(i int, result1 [][]byte, result2 error) {
+	fake.findAccountsMutex.Lock()
+	defer fake.findAccountsMutex.Unlock()
+	fake.FindAccountsStub = nil
+	if fake.findAccountsReturnsOnCall == nil {
+		fake.findAccountsReturnsOnCall = make(map[int]struct {
+			result1 [][]byte
+			result2 error
+		})
+	}
+	fake.findAccountsReturnsOnCall[i] = struct {
+		result1 [][]byte
 		result2 error
 	}{result1, result2}
 }
@@ -442,126 +406,6 @@ func (fake *FakeRepository) GetAccountOauthClientNameReturnsOnCall(i int, result
 		})
 	}
 	fake.getAccountOauthClientNameReturnsOnCall[i] = struct {
-		result1 []byte
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRepository) GetAccounts() ([][]byte, error) {
-	fake.getAccountsMutex.Lock()
-	ret, specificReturn := fake.getAccountsReturnsOnCall[len(fake.getAccountsArgsForCall)]
-	fake.getAccountsArgsForCall = append(fake.getAccountsArgsForCall, struct {
-	}{})
-	stub := fake.GetAccountsStub
-	fakeReturns := fake.getAccountsReturns
-	fake.recordInvocation("GetAccounts", []interface{}{})
-	fake.getAccountsMutex.Unlock()
-	if stub != nil {
-		return stub()
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeRepository) GetAccountsCallCount() int {
-	fake.getAccountsMutex.RLock()
-	defer fake.getAccountsMutex.RUnlock()
-	return len(fake.getAccountsArgsForCall)
-}
-
-func (fake *FakeRepository) GetAccountsCalls(stub func() ([][]byte, error)) {
-	fake.getAccountsMutex.Lock()
-	defer fake.getAccountsMutex.Unlock()
-	fake.GetAccountsStub = stub
-}
-
-func (fake *FakeRepository) GetAccountsReturns(result1 [][]byte, result2 error) {
-	fake.getAccountsMutex.Lock()
-	defer fake.getAccountsMutex.Unlock()
-	fake.GetAccountsStub = nil
-	fake.getAccountsReturns = struct {
-		result1 [][]byte
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRepository) GetAccountsReturnsOnCall(i int, result1 [][]byte, result2 error) {
-	fake.getAccountsMutex.Lock()
-	defer fake.getAccountsMutex.Unlock()
-	fake.GetAccountsStub = nil
-	if fake.getAccountsReturnsOnCall == nil {
-		fake.getAccountsReturnsOnCall = make(map[int]struct {
-			result1 [][]byte
-			result2 error
-		})
-	}
-	fake.getAccountsReturnsOnCall[i] = struct {
-		result1 [][]byte
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRepository) GetLimits(arg1 string) ([]byte, error) {
-	fake.getLimitsMutex.Lock()
-	ret, specificReturn := fake.getLimitsReturnsOnCall[len(fake.getLimitsArgsForCall)]
-	fake.getLimitsArgsForCall = append(fake.getLimitsArgsForCall, struct {
-		arg1 string
-	}{arg1})
-	stub := fake.GetLimitsStub
-	fakeReturns := fake.getLimitsReturns
-	fake.recordInvocation("GetLimits", []interface{}{arg1})
-	fake.getLimitsMutex.Unlock()
-	if stub != nil {
-		return stub(arg1)
-	}
-	if specificReturn {
-		return ret.result1, ret.result2
-	}
-	return fakeReturns.result1, fakeReturns.result2
-}
-
-func (fake *FakeRepository) GetLimitsCallCount() int {
-	fake.getLimitsMutex.RLock()
-	defer fake.getLimitsMutex.RUnlock()
-	return len(fake.getLimitsArgsForCall)
-}
-
-func (fake *FakeRepository) GetLimitsCalls(stub func(string) ([]byte, error)) {
-	fake.getLimitsMutex.Lock()
-	defer fake.getLimitsMutex.Unlock()
-	fake.GetLimitsStub = stub
-}
-
-func (fake *FakeRepository) GetLimitsArgsForCall(i int) string {
-	fake.getLimitsMutex.RLock()
-	defer fake.getLimitsMutex.RUnlock()
-	argsForCall := fake.getLimitsArgsForCall[i]
-	return argsForCall.arg1
-}
-
-func (fake *FakeRepository) GetLimitsReturns(result1 []byte, result2 error) {
-	fake.getLimitsMutex.Lock()
-	defer fake.getLimitsMutex.Unlock()
-	fake.GetLimitsStub = nil
-	fake.getLimitsReturns = struct {
-		result1 []byte
-		result2 error
-	}{result1, result2}
-}
-
-func (fake *FakeRepository) GetLimitsReturnsOnCall(i int, result1 []byte, result2 error) {
-	fake.getLimitsMutex.Lock()
-	defer fake.getLimitsMutex.Unlock()
-	fake.GetLimitsStub = nil
-	if fake.getLimitsReturnsOnCall == nil {
-		fake.getLimitsReturnsOnCall = make(map[int]struct {
-			result1 []byte
-			result2 error
-		})
-	}
-	fake.getLimitsReturnsOnCall[i] = struct {
 		result1 []byte
 		result2 error
 	}{result1, result2}
@@ -706,18 +550,14 @@ func (fake *FakeRepository) Invocations() map[string][][]interface{} {
 	defer fake.invocationsMutex.RUnlock()
 	fake.accountExistMutex.RLock()
 	defer fake.accountExistMutex.RUnlock()
-	fake.createUpdateLimitsMutex.RLock()
-	defer fake.createUpdateLimitsMutex.RUnlock()
 	fake.findAccountMutex.RLock()
 	defer fake.findAccountMutex.RUnlock()
+	fake.findAccountsMutex.RLock()
+	defer fake.findAccountsMutex.RUnlock()
 	fake.findTokenByEmailMutex.RLock()
 	defer fake.findTokenByEmailMutex.RUnlock()
 	fake.getAccountOauthClientNameMutex.RLock()
 	defer fake.getAccountOauthClientNameMutex.RUnlock()
-	fake.getAccountsMutex.RLock()
-	defer fake.getAccountsMutex.RUnlock()
-	fake.getLimitsMutex.RLock()
-	defer fake.getLimitsMutex.RUnlock()
 	fake.saveAccountMutex.RLock()
 	defer fake.saveAccountMutex.RUnlock()
 	fake.saveTokenMutex.RLock()

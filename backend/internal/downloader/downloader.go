@@ -11,8 +11,7 @@ import (
 
 	"google-backup/internal/account"
 	"google-backup/internal/files"
-	"google-backup/internal/media"
-	"google-backup/internal/media_reader"
+	"google-backup/internal/settings"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -21,6 +20,10 @@ const downloadsBatchLimit = 50
 
 type Downloader interface {
 	DownloadAll(ctx context.Context) error
+}
+
+type AccountDownloader interface {
+	Download(ctx context.Context, settingsData settings.SettingsData, account account.AccountData) error
 }
 
 type TooManyRequestsError struct {
@@ -36,51 +39,75 @@ type ManuallyRepeatableError struct {
 }
 
 type downloader struct {
-	repository     Repository
-	httpClient     *http.Client
-	mediaReader    media_reader.Reader
-	accountLimiter account.Limiter
-	filesManager   files.FilesManager
+	repository         Repository
+	accountRepository  account.Repository
+	httpClient         *http.Client
+	settingsRepository settings.Repository
+	filesManager       files.FilesManager
+	accountDownloader  AccountDownloader
 }
 
 func NewDownloader(
 	repository Repository,
+	accountRepository account.Repository,
 	httpClient *http.Client,
-	mediaReader media_reader.Reader,
-	accountLimiter account.Limiter,
+	settingsRepository settings.Repository,
 	filesManager files.FilesManager,
+	accountDownloader AccountDownloader,
 ) downloader {
 	return downloader{
-		repository:     repository,
-		httpClient:     httpClient,
-		mediaReader:    mediaReader,
-		accountLimiter: accountLimiter,
-		filesManager:   filesManager,
+		repository:         repository,
+		accountRepository:  accountRepository,
+		httpClient:         httpClient,
+		settingsRepository: settingsRepository,
+		filesManager:       filesManager,
+		accountDownloader:  accountDownloader,
 	}
 }
 
 func (d downloader) DownloadAll(ctx context.Context) error {
-	readers, err := d.mediaReader.CreateMediaReaders(ctx)
+	settingsJson, err := d.settingsRepository.Find()
 	if err != nil {
-		return fmt.Errorf("create media readers: %w", err)
+		return fmt.Errorf("find settings: %w", err)
+	}
+
+	var settingsData settings.SettingsData
+	err = json.Unmarshal(settingsJson, &settingsData)
+	if err != nil {
+		return fmt.Errorf("unmarshal settings: %w", err)
+	}
+
+	accountsJson, err := d.accountRepository.FindAccounts()
+	if err != nil {
+		return fmt.Errorf("get accounts: %w", err)
+	}
+
+	var accounts []account.AccountData
+
+	for _, accountJson := range accountsJson {
+		var accountData account.AccountData
+		err = json.Unmarshal(accountJson, &accountData)
+		if err != nil {
+			return fmt.Errorf("unmarshal account: %w", err)
+		}
+		accounts = append(accounts, accountData)
 	}
 
 	errs, ctx := errgroup.WithContext(ctx)
 
-	for email, reader := range readers {
-		r := reader
-		e := email
+	for _, acc := range accounts {
+		func(s settings.SettingsData, a account.AccountData) {
+			errs.Go(
+				func() error {
+					err := d.accountDownloader.Download(ctx, s, a)
+					if err != nil {
+						return fmt.Errorf("account download: %w", err)
+					}
 
-		errs.Go(
-			func() error {
-				err = d.download(ctx, r, e)
-				if err != nil {
-					return fmt.Errorf("download: %w", err)
-				}
-
-				return nil
-			},
-		)
+					return nil
+				},
+			)
+		}(settingsData, acc)
 	}
 
 	return errs.Wait()

@@ -3,7 +3,6 @@ package dependencies
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"google-backup/internal/account"
 	"google-backup/internal/auth"
@@ -11,7 +10,7 @@ import (
 	"google-backup/internal/downloader"
 	"google-backup/internal/files"
 	"google-backup/internal/google_client"
-	"google-backup/internal/media_reader"
+	"google-backup/internal/photos"
 	"google-backup/internal/scanner"
 	"google-backup/internal/settings"
 )
@@ -27,17 +26,18 @@ type Dependencies struct {
 	Account                account.Account
 	AccountRepository      account.Repository
 	ScannerRepository      scanner.Repository
-	UpdatesScanner         scanner.UpdatesScanner
+	PhotosUpdatesScanner   scanner.UpdatesScanner
 	DownloadScheduler      downloader.Scheduler
-	AccountLimiter         account.Limiter
+	ClienLimiter           google_client.Limiter
 	SettingsRepository     settings.Repository
 	SettingsInitializer    settings.SettingsInitializer
 	DownloaderRepository   downloader.Repository
 	Downloader             downloader.Downloader
-	MediaReader            media_reader.Reader
 	FilesRepository        files.Repository
 	FilesManager           files.FilesManager
 	GoogleClientRepository google_client.Repository
+	ReaderCreater          photos.ReaderCreater
+	PhotosScanner          scanner.AccountScanner
 }
 
 type factory struct{}
@@ -60,41 +60,47 @@ func (f factory) Create() (Dependencies, error) {
 		AccountRepository:      account.NewRepository(connection.DB),
 		ScannerRepository:      scanner.NewRepository(connection.DB),
 		DownloadScheduler:      downloader.NewScheduler(downloader.NewRepository(connection.DB)),
-		AccountLimiter:         account.NewLimiter(account.NewRepository(connection.DB)),
 		SettingsRepository:     settings.NewRepository(connection.DB),
 		DownloaderRepository:   downloader.NewRepository(connection.DB),
 		FilesRepository:        files.NewRepository(connection.DB),
 		GoogleClientRepository: google_client.NewRepository(connection.DB),
 	}
 
+	deps.ClienLimiter = google_client.NewLimiter(deps.GoogleClientRepository)
+
 	deps.SettingsInitializer = settings.NewSettings(deps.SettingsRepository)
 
-	deps.Account = account.NewAccount(deps.AccountRepository)
+	deps.Account = account.NewAccount(deps.AccountRepository, deps.GoogleClientRepository)
 
 	deps.GoogleAuth = auth.NewGoogleAuth(deps.AuthRepository, deps.GoogleClientRepository)
 
 	deps.FilesManager = files.NewFilesManager(deps.FilesRepository)
 
-	deps.MediaReader = media_reader.NewMediaReader(
+	deps.ReaderCreater = photos.NewReaderCreater(
 		deps.Account,
 		deps.GoogleAuth,
-		deps.AccountLimiter,
 	)
 
-	deps.UpdatesScanner = scanner.NewUpdatesScanner(
+	deps.PhotosScanner = scanner.NewPhotosScanner(
 		deps.ScannerRepository,
+		deps.ReaderCreater,
+		deps.ClienLimiter,
 		deps.DownloadScheduler,
-		deps.AccountLimiter,
-		deps.MediaReader,
 	)
 
-	deps.Downloader = downloader.NewDownloader(
-		deps.DownloaderRepository,
-		&http.Client{},
-		deps.MediaReader,
-		deps.AccountLimiter,
-		deps.FilesManager,
+	deps.PhotosUpdatesScanner = scanner.NewUpdatesScanner(
+		deps.AccountRepository,
+		deps.SettingsRepository,
+		deps.PhotosScanner,
 	)
+
+	// deps.Downloader = downloader.NewDownloader(
+	// 	deps.DownloaderRepository,
+	// 	&http.Client{},
+	// 	deps.MediaReader,
+	// 	deps.AccountLimiter,
+	// 	deps.FilesManager,
+	// )
 
 	return deps, nil
 }
