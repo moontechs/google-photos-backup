@@ -6,11 +6,10 @@ services:
     volumes:
       - ./frontend:/app
     command:
-      - pnpm
-      - dev 
-      - --port=8080 
-      - --host
-    restart: always
+      - /app/start_dev.sh
+    env_file:
+      - .env.local
+    restart: unless-stopped
     
   surrealdb:
     image: surrealdb/surrealdb:v1.5.2
@@ -25,18 +24,16 @@ services:
       - start
       - --auth
       - file:/data/database.db
-    restart: always
+    restart: unless-stopped
 
-  # database-setup:
-  #   image: database-setup:latest
-  #   build: ./database
-  #   volumes:
-  #     - ./database:/app
-  #   command: sh /app/setup.sh
-  #   env_file:
-  #     - .env.local
-  #   depends_on:
-  #     - surrealdb
+  setup:
+   build: ./database
+   volumes:
+     - ./database:/data
+   env_file:
+     - .env.local
+   depends_on:
+     - surrealdb
 
   # database-setup:
   #   image: surrealdb/surrealdb:latest

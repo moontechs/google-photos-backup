@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,node
-# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,macos,node
+# Created by https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,vuejs,node
+# Edit at https://www.toptal.com/developers/gitignore?templates=macos,visualstudiocode,vuejs,node
 
 ### macOS ###
 # General
@@ -193,7 +193,14 @@ dist
 .history
 .ionide
 
-# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,macos,node
+### Vuejs ###
+# Recommended template: Node.gitignore
+
+dist/
+npm-debug.log
+yarn-error.log
+
+# End of https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,vuejs,node
 
 .idea
 .pnpm-store
